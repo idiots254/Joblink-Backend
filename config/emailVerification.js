@@ -49,48 +49,40 @@ const getEmailTemplate = (code, userEmail) => {
 <html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Verify Your Email</title>
 <style>
-* { margin: 0; padding: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
-html, body { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #ffffff; }
-body { background-color: #ffffff; width: 100% !important; min-width: 100% !important; }
-table { width: 100% !important; max-width: 100%; border-spacing: 0; border-collapse: collapse; }
-td, th { padding: 0; margin: 0; word-break: break-word; }
-img { outline: none; border: none; text-decoration: none; max-width: 100%; height: auto; }
-a { text-decoration: none; color: inherit; }
+* { margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5; }
+.container { max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 40px 20px; border-radius: 8px; }
+.header { text-align: center; margin-bottom: 30px; }
+.logo { font-size: 28px; font-weight: bold; color: #007AFF; margin-bottom: 10px; }
+.content { color: #333333; line-height: 1.6; }
+.code-box { background-color: #f0f0f0; border-radius: 8px; padding: 20px; text-align: center; margin: 20px 0; }
+.code { font-size: 32px; font-weight: bold; color: #007AFF; letter-spacing: 4px; font-family: 'Courier New', monospace; }
+.footer { font-size: 12px; color: #888888; text-align: center; margin-top: 30px; border-top: 1px solid #eeeeee; padding-top: 20px; }
 </style>
 </head>
 <body>
-<table role="presentation" width="100%">
-<tbody>
-<tr>
-<td style="padding: 0; width: 100%;">
-<div style="background-color: #ffffff; padding: 20px 8px; margin: 8px; border-radius: 12px;">
-<div style="text-align: center; margin: 0 0 20px 0;">
-<img src="cid:logo" alt="Joblink Logo" style="max-width: 120px; height: auto; display: inline-block;">
+<div class="container">
+<div class="header">
+<div class="logo">Joblink</div>
 </div>
-<div style="border: 1px solid #f0f0f0; border-radius: 8px; padding: 16px 20px; margin: 0 0 20px 0;">
-<p style="margin: 0 0 12px 0; font-size: 14px; color: #555555;">Hello, Welcome to Joblink. Your verification code is:</p>
-<div style="text-align: center; margin: 12px 0;">
-<p style="margin: 0; font-size: 28px; font-weight: 500; color: #333333; letter-spacing: 12px; font-family: monospace;">${code}</p>
+<div class="content">
+<p>Hello,</p>
+<p>Welcome to Joblink! Your email verification code is:</p>
+<div class="code-box">
+<div class="code">${code}</div>
 </div>
-<p style="margin: 12px 0 8px 0; font-size: 12px; color: #555555;">This code is valid for <strong>15 minutes</strong> and can only be used once.</p>
-<p style="margin: 0 0 12px 0; font-size: 12px; color: #ff6b6b; background-color: #fff5f5; padding: 8px; border-radius: 4px;"><strong>⚠️ Check your spam/junk folder if you don't see this email in your inbox.</strong></p>
-<p style="margin: 0 0 12px 0; font-size: 12px; color: #555555;">Please don't share this code with anyone. Joblink support will never ask for your verification code.</p>
-<p style="margin: 12px 0 0 0; font-size: 12px; color: #555555;">You are receiving this email because a verification code was requested for you to be able to create Joblink account. If you did not request this, ignore this email.</p>
-<p style="margin: 12px 0 0 0; font-size: 12px; color: #555555;">Regards,</p>
-<p style="margin: 0; font-size: 12px; color: #555555;">The Joblink Team</p>
+<p>This code is valid for <strong>15 minutes</strong> and can only be used once.</p>
+<p>Please don't share this code with anyone. Joblink support will never ask for your verification code.</p>
+<p>You are receiving this email because a verification code was requested for you to create a Joblink account. If you did not request this, please ignore this email.</p>
+<p>Best regards,<br>The Joblink Team</p>
 </div>
-<div style="text-align: center;">
-<p style="margin: 0 0 6px 0; font-size: 11px; color: #888888; font-weight: 700;">Joblink</p>
-<p style="margin: 0; font-size: 10px; color: #aaaaaa; line-height: 1.5;">Connecting Jobs with Talent | 2026 Joblink. All Rights Reserved.</p>
+<div class="footer">
+<p>Connecting Jobs with Talent | 2026 Joblink. All rights reserved.</p>
 </div>
 </div>
-</td>
-</tr>
-</tbody>
-</table>
 </body>
 </html>`;
 };
@@ -140,9 +132,6 @@ const sendVerificationCode = async (email) => {
     // Get email template
     const emailTemplate = getEmailTemplate(code, email);
     
-    // Get logo for email
-    const logoBase64 = getLogoBase64();
-    
     // Send verification email using SendGrid
     const msg = {
       to: email,
@@ -161,14 +150,7 @@ const sendVerificationCode = async (email) => {
         'X-Mailer': 'Joblink',
         'List-Unsubscribe': '<mailto:support@joblink.app?subject=unsubscribe>',
         'Precedence': 'bulk'
-      },
-      attachments: logoBase64 ? [{
-        content: logoBase64.split('base64,')[1],
-        filename: 'logo.png',
-        type: 'image/png',
-        disposition: 'inline',
-        contentId: 'logo'
-      }] : []
+      }
     };
 
     await sgMail.send(msg);
@@ -176,7 +158,7 @@ const sendVerificationCode = async (email) => {
     console.log(`✅ Verification code sent successfully to ${email}`);
     return {
       success: true,
-      message: 'Verification code sent to your email. Check spam folder if not received in 1 minute.',
+      message: 'Verification code sent to your email',
       expiresIn: '15 minutes',
       sentTo: email
     };
