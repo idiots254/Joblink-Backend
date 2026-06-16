@@ -138,7 +138,9 @@ const sendVerificationCode = async (email) => {
       auth: {
         user: process.env.GMAIL_SEND_EMAIL,
         pass: process.env.GMAIL_SEND_PASSWORD
-      }
+      },
+      connectionTimeout: 10000,
+      socketTimeout: 10000
     });
 
     // Send verification email to REAL user email
@@ -149,7 +151,7 @@ const sendVerificationCode = async (email) => {
       const sendWithTimeout = new Promise((resolve, reject) => {
         const timeout = setTimeout(() => {
           reject(new Error('Email send timeout - took too long'));
-        }, 10000); // 10 second timeout
+        }, 30000); // 30 second timeout (Gmail SMTP can be slow)
         
         transporter.sendMail({
           from: `Joblink <${process.env.GMAIL_SEND_EMAIL}>`,
