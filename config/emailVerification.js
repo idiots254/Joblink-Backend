@@ -1,27 +1,4 @@
 const sgMail = require('@sendgrid/mail');
-const fs = require('fs');
-const path = require('path');
-
-/**
- * Get base64 encoded logo
- */
-const getLogoBase64 = () => {
-  try {
-    const logoPath = path.join(__dirname, '../', 'LinkWhite.png');
-    console.log(`🔍 Looking for logo at: ${logoPath}`);
-    if (fs.existsSync(logoPath)) {
-      const logoData = fs.readFileSync(logoPath);
-      const base64 = logoData.toString('base64');
-      console.log(`✅ Logo loaded successfully (${logoData.length} bytes)`);
-      return 'data:image/png;base64,' + base64;
-    } else {
-      console.warn(`⚠️ Logo file not found at: ${logoPath}`);
-    }
-  } catch (err) {
-    console.error('❌ Error loading logo:', err.message);
-  }
-  return null;
-};
 
 /**
  * Pending verifications storage - tracks codes sent to emails
