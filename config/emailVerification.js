@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+const sgTransport = require('nodemailer-sendgrid-transport');
 const fs = require('fs');
 const path = require('path');
 
@@ -132,16 +133,12 @@ const sendVerificationCode = async (email) => {
       };
     }
 
-    // Create transporter with Gmail SMTP
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
+    // Create transporter with SendGrid
+    const transporter = nodemailer.createTransport(sgTransport({
       auth: {
-        user: process.env.GMAIL_SEND_EMAIL,
-        pass: process.env.GMAIL_SEND_PASSWORD
-      },
-      connectionTimeout: 10000,
-      socketTimeout: 10000
-    });
+        api_key: process.env.SENDGRID_API_KEY
+      }
+    }));
 
     // Send verification email to REAL user email
     try {
@@ -154,7 +151,7 @@ const sendVerificationCode = async (email) => {
         }, 30000); // 30 second timeout (Gmail SMTP can be slow)
         
         transporter.sendMail({
-          from: `Joblink <${process.env.GMAIL_SEND_EMAIL}>`,
+          from: 'noreply@joblink.app',
           to: email,
           subject: 'Joblink Email Verification',
           html: emailTemplate,
