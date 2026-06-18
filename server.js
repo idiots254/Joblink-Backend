@@ -8,12 +8,7 @@ const authRoutes = require('./routes/auth');
 const app = express();
 
 // Middleware
-const corsOptions = {
-  origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : '*',
-  credentials: true,
-  optionsSuccessStatus: 200
-};
-app.use(cors(corsOptions));
+app.use(cors());
 app.use(express.json());
 
 // Routes

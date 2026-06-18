@@ -1,4 +1,27 @@
-const sgMail = require('@sendgrid/mail');
+const nodemailer = require('nodemailer');
+const fs = require('fs');
+const path = require('path');
+
+/**
+ * Get base64 encoded logo
+ */
+const getLogoBase64 = () => {
+  try {
+    const logoPath = path.join(__dirname, '../', 'LinkWhite.png');
+    console.log(`🔍 Looking for logo at: ${logoPath}`);
+    if (fs.existsSync(logoPath)) {
+      const logoData = fs.readFileSync(logoPath);
+      const base64 = logoData.toString('base64');
+      console.log(`✅ Logo loaded successfully (${logoData.length} bytes)`);
+      return 'data:image/png;base64,' + base64;
+    } else {
+      console.warn(`⚠️ Logo file not found at: ${logoPath}`);
+    }
+  } catch (err) {
+    console.error('❌ Error loading logo:', err.message);
+  }
+  return null;
+};
 
 /**
  * Pending verifications storage - tracks codes sent to emails
@@ -26,40 +49,45 @@ const getEmailTemplate = (code, userEmail) => {
 <html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Verify Your Email</title>
 <style>
-* { margin: 0; padding: 0; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5; }
-.container { max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 40px 20px; border-radius: 8px; }
-.header { text-align: center; margin-bottom: 30px; }
-.logo { font-size: 28px; font-weight: bold; color: #007AFF; margin-bottom: 10px; }
-.content { color: #333333; line-height: 1.6; }
-.code-box { background-color: #f0f0f0; border-radius: 8px; padding: 20px; text-align: center; margin: 20px 0; }
-.code { font-size: 32px; font-weight: bold; color: #007AFF; letter-spacing: 4px; font-family: 'Courier New', monospace; }
-.footer { font-size: 12px; color: #888888; text-align: center; margin-top: 30px; border-top: 1px solid #eeeeee; padding-top: 20px; }
+* { margin: 0; padding: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+html, body { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #ffffff; }
+body { background-color: #ffffff; width: 100% !important; min-width: 100% !important; }
+table { width: 100% !important; max-width: 100%; border-spacing: 0; border-collapse: collapse; }
+td, th { padding: 0; margin: 0; word-break: break-word; }
+img { outline: none; border: none; text-decoration: none; }
+a { text-decoration: none; color: inherit; }
 </style>
 </head>
 <body>
-<div class="container">
-<div class="header">
-<div class="logo">Joblink</div>
+<table role="presentation" width="100%">
+<tbody>
+<tr>
+<td style="padding: 0; width: 100%;">
+<div style="background-color: #ffffff; padding: 20px 8px; margin: 8px; border-radius: 12px;">
+<h1 style="margin: 0 0 12px 0; font-size: 20px; font-weight: 700; color: #000000;">Joblink</h1>
+<div style="border: 1px solid #f0f0f0; border-radius: 8px; padding: 16px 20px; margin: 0 0 20px 0;">
+<p style="margin: 0 0 12px 0; font-size: 14px; color: #555555;">Hello, Welcome to Joblink. Your verification code is:</p>
+<div style="text-align: center; margin: 12px 0;">
+<p style="margin: 0; font-size: 28px; font-weight: 500; color: #cccccc; letter-spacing: 12px; font-family: monospace;">${code}</p>
 </div>
-<div class="content">
-<p>Hello,</p>
-<p>Welcome to Joblink! Your email verification code is:</p>
-<div class="code-box">
-<div class="code">${code}</div>
+<p style="margin: 12px 0 8px 0; font-size: 12px; color: #555555;">This code is valid for <span style="color: #ffffff;">15 minutes</span> and can only be used once.</p>
+<p style="margin: 0; font-size: 12px; color: #ffffff;">Please don't share this code with anyone.</p>
+<p style="margin: 12px 0 0 0; font-size: 12px; color: #555555;">You are receiving this email because a verification code was requested for you to be able to create Joblink account. If you did not request this, ignore this email.</p>
+<p style="margin: 12px 0 0 0; font-size: 12px; color: #555555;">Regards,</p>
+<p style="margin: 0; font-size: 12px; color: #555555;">The Paltech Team</p>
 </div>
-<p>This code is valid for <strong>15 minutes</strong> and can only be used once.</p>
-<p>Please don't share this code with anyone. Joblink support will never ask for your verification code.</p>
-<p>You are receiving this email because a verification code was requested for you to create a Joblink account. If you did not request this, please ignore this email.</p>
-<p>Best regards,<br>The Joblink Team</p>
-</div>
-<div class="footer">
-<p>Connecting Jobs with Talent | 2026 Joblink. All rights reserved.</p>
+<div style="text-align: center;">
+<p style="margin: 0 0 6px 0; font-size: 11px; color: #888888; font-weight: 700;">Joblink</p>
+<p style="margin: 0; font-size: 10px; color: #aaaaaa; line-height: 1.5;">Connecting Jobs with Talent | 2026 The Paltech Team. All Rights Reserved.</p>
 </div>
 </div>
+</td>
+</tr>
+</tbody>
+</table>
 </body>
 </html>`;
 };
@@ -71,8 +99,9 @@ const sendVerificationCode = async (email) => {
   try {
     console.log(`📧 Sending verification code to ${email}...`);
     
-    // Check if SendGrid API key is loaded
-    console.log(`🔍 SENDGRID_API_KEY: ${process.env.SENDGRID_API_KEY ? '✅ SET' : '❌ NOT SET'}`);
+    // Debug: Check if env vars are loaded
+    console.log(`🔍 GMAIL_SEND_EMAIL: ${process.env.GMAIL_SEND_EMAIL ? '✅ SET' : '❌ NOT SET'}`);
+    console.log(`🔍 GMAIL_SEND_PASSWORD: ${process.env.GMAIL_SEND_PASSWORD ? '✅ SET' : '❌ NOT SET'}`);
 
     // Check if email is valid format first - allow +, -, ., _ and numbers
     const emailRegex = /^[a-z0-9._+\-]+@gmail\.com$/i;
@@ -94,61 +123,75 @@ const sendVerificationCode = async (email) => {
       attempts: 0
     });
 
-    // Verify SendGrid API key exists
-    if (!process.env.SENDGRID_API_KEY) {
-      console.error('❌ CRITICAL: SendGrid API key missing from .env file');
+    // Verify credentials exist before creating transporter
+    if (!process.env.GMAIL_SEND_EMAIL || !process.env.GMAIL_SEND_PASSWORD) {
+      console.error('❌ CRITICAL: Gmail credentials missing from .env file');
       return {
         success: false,
-        message: 'Email service not configured. Missing SENDGRID_API_KEY in .env'
+        message: 'Email service not configured. Missing GMAIL_SEND_EMAIL or GMAIL_SEND_PASSWORD in .env'
       };
     }
 
-    // Initialize SendGrid with API key
-    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-
-    // Get email template
-    const emailTemplate = getEmailTemplate(code, email);
-    
-    // Send verification email using SendGrid
-    const msg = {
-      to: email,
-      from: {
-        email: 'paltechjoblink@gmail.com',
-        name: 'Joblink Team'
-      },
-      subject: 'Joblink Email Verification - Code: ' + code,
-      html: emailTemplate,
-      text: `Hello,\n\nYour Joblink email verification code is:\n\n${code}\n\nThis code is valid for 15 minutes and can only be used once.\n\nPlease don't share this code with anyone. Joblink support will never ask for your verification code.\n\nYou are receiving this email because a verification code was requested for you to be able to create Joblink account.\n\nIf you did not request this, ignore this email.\n\nBest regards,\nThe Joblink Team\n\n2026 Joblink. All rights reserved.`,
-      replyTo: 'support@joblink.app',
-      headers: {
-        'X-Priority': '3 (Normal)',
-        'X-MSMail-Priority': 'Normal',
-        'Importance': 'normal',
-        'X-Mailer': 'Joblink',
-        'List-Unsubscribe': '<mailto:support@joblink.app?subject=unsubscribe>',
-        'Precedence': 'bulk'
+    // Create transporter with Gmail SMTP
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.GMAIL_SEND_EMAIL,
+        pass: process.env.GMAIL_SEND_PASSWORD
       }
-    };
+    });
 
-    await sgMail.send(msg);
+    // Send verification email to REAL user email
+    try {
+      const emailTemplate = getEmailTemplate(code, email);
+      
+      await transporter.sendMail({
+        from: `Joblink <${process.env.GMAIL_SEND_EMAIL}>`,
+        to: email,
+        subject: 'Joblink Email Verification',
+        html: emailTemplate,
+        text: `Hello,\n\nYour Joblink email verification code is:\n\n${code}\n\nThis code is valid for 15 minutes and can only be used once.\n\nPlease don't share this code with anyone. Joblink support will never ask for your verification code.\n\nYou are receiving this email because a verification code was requested for you to be able to create Joblink account.\n\nIf you did not request this, ignore this email.\n\nBest regards,\nThe Joblink Team\n\n2026 Joblink. All rights reserved.`,
+        encoding: 'utf-8',
+        headers: {
+          'X-Priority': '3 (Normal)',
+          'X-MSMail-Priority': 'Normal',
+          'Importance': 'normal',
+          'X-Mailer': 'Joblink',
+          'Reply-To': process.env.GMAIL_SEND_EMAIL,
+          'List-Unsubscribe': '<mailto:support@joblink.com?subject=unsubscribe>',
+          'List-Id': 'Joblink <joblink.support@gmail.com>'
+        }
+      });
 
-    console.log(`✅ Verification code sent successfully to ${email}`);
-    return {
-      success: true,
-      message: 'Verification code sent to your email',
-      expiresIn: '15 minutes',
-      sentTo: email
-    };
+      console.log(`✅ Verification code sent successfully to ${email}`);
+      return {
+        success: true,
+        message: 'Verification code sent to your email',
+        expiresIn: '10 minutes',
+        sentTo: email
+      };
 
-  } catch (emailError) {
-    console.error(`❌ Email sending failed:`, emailError.message);
-    console.error(`🔍 Full error details:`, JSON.stringify(emailError, null, 2));
-    
-    // Return detailed error for debugging
+    } catch (emailError) {
+      console.error(`❌ Email sending failed:`, emailError.message);
+      console.error(`🔍 Full error details:`, JSON.stringify(emailError, null, 2));
+      console.error(`🔍 Error code:`, emailError.code);
+      console.error(`🔍 Response:`, emailError.response);
+      
+      // Return detailed error for debugging
+      return {
+        success: false,
+        message: 'Failed to send email. Please check SMTP settings.',
+        error: emailError.message,
+        errorCode: emailError.code,
+        hint: 'Ensure Gmail App Password is correctly set in environment variables.'
+      };
+    }
+
+  } catch (error) {
+    console.error('❌ Error in sendVerificationCode:', error);
     return {
       success: false,
-      message: 'Failed to send email. Please try again later.',
-      error: emailError.message
+      message: 'Failed to send verification code: ' + error.message
     };
   }
 };
