@@ -186,6 +186,16 @@ const sendVerificationCode = async (email) => {
         };
       } catch (sendGridError) {
         console.error('❌ SendGrid email sending failed:', sendGridError);
+        try {
+          if (sendGridError && sendGridError.response) {
+            console.error('🔍 SendGrid response headers:', sendGridError.response.headers);
+            // response.body can be an object or a string depending on the error
+            console.error('🔍 SendGrid response body:', sendGridError.response.body || sendGridError.response);
+          }
+        } catch (logErr) {
+          console.error('❌ Failed to log SendGrid error details:', logErr);
+        }
+
         if (isGmailConfigured) {
           console.warn('⚠️ SendGrid failed; falling back to Gmail SMTP because Gmail credentials are available.');
           EMAIL_VERIFICATION_METHOD = 'smtp';
