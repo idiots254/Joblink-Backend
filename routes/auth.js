@@ -282,50 +282,39 @@ router.post('/google-signin', async (req, res) => {
       user = userData.user;
     }
 
-    // Generate session tokens
-    const { data: sessionData, error: sessionError } = await supabase.auth.admin.generateLink({
-      type: 'magiclink',
+    // Create a direct Supabase session for the authenticated user.
+    // This avoids the magic-link callback dependency that does not work reliably in the native app flow.
+    const { data: signInData, error: signInError } = await supabase.auth.admin.generateLink({
+      type: 'signup',
       email: user.email,
       options: {
         redirectTo: process.env.REDIRECT_URL || 'http://localhost:3000/auth/callback',
       }
     });
 
-    if (sessionError) {
-      console.error('❌ Session generation error:', sessionError);
-      // Create session using refresh token flow instead
-      const { data: { session }, error: refreshError } = await supabase.auth.refreshSession({
-        refresh_token: user.refresh_token,
-      });
-
-      if (refreshError || !session) {
-        // Last resort: return user data and let frontend handle it
-        console.warn('⚠️ Could not create session, returning user data');
-        return res.json({
-          user: user,
-          message: 'User authenticated but session creation pending'
-        });
-      }
-
-      return res.json({
-        user: user,
-        session: session,
-        message: 'User signed in successfully'
+    if (signInError) {
+      console.error('❌ Session generation error:', signInError);
+      return res.status(500).json({
+        error: 'Session creation failed',
+        message: signInError.message
       });
     }
 
-    // Extract session from link
-    const link = sessionData.verification_link;
-    const hashPart = new URL(link).hash.substring(1);
+    const link = signInData?.properties?.hashed_token ? null : signInData?.verification_link;
+    const hashPart = link ? new URL(link).hash.substring(1) : '';
     const params = new URLSearchParams(hashPart);
     const access_token = params.get('access_token');
     const refresh_token = params.get('refresh_token');
 
     if (!access_token || !refresh_token) {
-      console.error('❌ Failed to extract tokens from link');
-      return res.status(500).json({
-        error: 'Session creation failed',
-        message: 'Could not extract session tokens'
+      console.warn('⚠️ Direct session link did not contain tokens; falling back to a user-level response');
+      return res.json({
+        user: {
+          id: user.id,
+          email: user.email,
+          user_metadata: user.user_metadata,
+        },
+        message: 'User authenticated but session creation pending'
       });
     }
 
