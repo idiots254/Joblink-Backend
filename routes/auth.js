@@ -194,13 +194,13 @@ router.post('/google-signin', async (req, res) => {
     console.log('🔐 Verifying Google token for:', email);
 
     // Verify Google token
-    const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID || '423078146697-a07lt64l19fac1h21k7opdd4s8teog9r.apps.googleusercontent.com');
+    const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID || '541772603049-qame2cc6bub14oag2f6lbr9oe3i1q8sm.apps.googleusercontent.com');
     
     let payload;
     try {
       const ticket = await googleClient.verifyIdToken({
         idToken: token,
-        audience: process.env.GOOGLE_CLIENT_ID || '423078146697-a07lt64l19fac1h21k7opdd4s8teog9r.apps.googleusercontent.com',
+        audience: process.env.GOOGLE_CLIENT_ID || '541772603049-qame2cc6bub14oag2f6lbr9oe3i1q8sm.apps.googleusercontent.com',
       });
       payload = ticket.getPayload();
       console.log('✅ Google token verified for:', payload.email);
