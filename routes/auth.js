@@ -202,22 +202,51 @@ router.post('/google-signin', async (req, res) => {
       });
     }
 
-    // Verify Google token
-    const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID || '541772603049-qame2cc6bub14oag2f6lbr9oe3i1q8sm.apps.googleusercontent.com');
-    
+    // Verify Google token against allowed OAuth client IDs.
+    const googleClientIds = [
+      process.env.GOOGLE_CLIENT_ID || '541772603049-qame2cc6bub14oag2f6lbr9oe3i1q8sm.apps.googleusercontent.com',
+    ];
+    if (process.env.GOOGLE_ANDROID_CLIENT_ID) {
+      googleClientIds.push(process.env.GOOGLE_ANDROID_CLIENT_ID);
+    }
+
+    const googleClient = new OAuth2Client(googleClientIds[0]);
+
+    // Decode token payload to log the audience (helps debug audience mismatches)
+    let decodedAud = null;
+    try {
+      const parts = String(token).split('.');
+      if (parts.length === 3) {
+        const raw = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+        const padded = raw + '='.repeat((4 - (raw.length % 4)) % 4);
+        const payloadJson = Buffer.from(padded, 'base64').toString('utf8');
+        const payloadObj = JSON.parse(payloadJson);
+        decodedAud = payloadObj.aud || payloadObj.audience || null;
+        console.log('ℹ️ Decoded token audience (pre-verify):', decodedAud);
+      } else {
+        console.log('⚠️ Token not in JWT format, cannot decode audience');
+      }
+    } catch (e) {
+      console.warn('⚠️ Failed to decode token payload for debugging:', e.message);
+    }
+
     let payload;
     try {
       const ticket = await googleClient.verifyIdToken({
         idToken: token,
-        audience: process.env.GOOGLE_CLIENT_ID || '541772603049-qame2cc6bub14oag2f6lbr9oe3i1q8sm.apps.googleusercontent.com',
+        audience: googleClientIds,
       });
       payload = ticket.getPayload();
-      console.log('✅ Google token verified for:', payload.email);
+      console.log('✅ Google token verified for:', payload.email, 'audience:', payload.aud);
     } catch (tokenError) {
       console.error('❌ Google token verification failed:', tokenError.message);
+      console.error('   Expected audiences:', googleClientIds);
+      console.error('   Decoded token aud (pre-verify):', decodedAud);
       return res.status(401).json({
         error: 'Invalid Google token',
-        message: 'Token verification failed'
+        message: 'Token verification failed',
+        token_audience: decodedAud || undefined,
+        expected_audiences: googleClientIds
       });
     }
 
