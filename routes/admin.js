@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const { createClient } = require('@supabase/supabase-js');
+const { /* createClient */ } = require('@supabase/supabase-js');
+const { getAdminClient } = require('../supabaseAdmin');
 
 /**
  * GET /api/admin/authenticated-users
@@ -11,14 +12,13 @@ const { createClient } = require('@supabase/supabase-js');
  */
 router.get('/authenticated-users', async (req, res) => {
   try {
-    const supabaseUrl = process.env.SUPABASE_URL;
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!supabaseUrl || !supabaseServiceKey) {
-      console.error('Supabase config missing');
+    let supabase;
+    try {
+      supabase = getAdminClient();
+    } catch (e) {
+      console.error('Supabase config missing or invalid', e?.message || e);
       return res.status(500).json({ ok: false, error: 'Missing Supabase configuration' });
     }
-
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // First, try to authorize via Authorization: Bearer <access_token>
     const authHeader = req.headers['authorization'] || req.headers['Authorization'];

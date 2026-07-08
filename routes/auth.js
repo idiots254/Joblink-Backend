@@ -1,51 +1,18 @@
 const express = require('express');
 const router = express.Router();
 const { verifyGoogleEmail, sendVerificationCode, verifyCode } = require('../config/emailVerification');
-const { createClient } = require('@supabase/supabase-js');
+const { getAdminClient } = require('../supabaseAdmin');
+const cache = require('../cache');
+const { emailBody, codeBody, googleSigninBody } = require('../middleware/validators');
 const { OAuth2Client } = require('google-auth-library');
 
-const getSupabaseAdminClient = () => {
-  const supabaseUrl = process.env.SUPABASE_URL || 'https://cvsifkizrofmorvfmwmq.supabase.co';
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!supabaseServiceKey) {
-    throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY environment variable');
-  }
-  return createClient(supabaseUrl, supabaseServiceKey);
-};
-
-const emailAlreadyRegistered = async (email) => {
-  const normalizedEmail = String(email).toLowerCase();
-  const supabaseAdmin = getSupabaseAdminClient();
-  if (!supabaseAdmin) return false;
-
-  const { data: userList, error: userListError } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 100 });
-  if (userListError) {
-    throw userListError;
-  }
-
-  const existingAuthUser = userList?.users?.find((user) => user.email?.toLowerCase() === normalizedEmail) || null;
-  if (existingAuthUser) {
-    return true;
-  }
-
-  const { data: existingProfile, error: profileError } = await supabaseAdmin
-    .from('profiles')
-    .select('id')
-    .eq('email', normalizedEmail)
-    .maybeSingle();
-
-  if (profileError) {
-    throw profileError;
-  }
-
-  return !!existingProfile;
-};
+const normalizeEmail = (email) => String(email || '').toLowerCase().trim();
 
 /**
  * POST /api/auth/verify-google-email
  * Check if email format is valid and if already verified
  */
-router.post('/verify-google-email', async (req, res) => {
+router.post('/verify-google-email', emailBody, async (req, res) => {
   try {
     const { email } = req.body;
 
@@ -109,7 +76,7 @@ router.post('/verify-google-email', async (req, res) => {
  *   expiresIn: string
  * }
  */
-router.post('/send-verification-code', async (req, res) => {
+router.post('/send-verification-code', emailBody, async (req, res) => {
   try {
     const { email } = req.body;
 
@@ -149,7 +116,7 @@ router.post('/send-verification-code', async (req, res) => {
  *   message: string
  * }
  */
-router.post('/verify-code', async (req, res) => {
+router.post('/verify-code', codeBody, async (req, res) => {
   try {
     const { email, code } = req.body;
 
@@ -180,7 +147,7 @@ router.post('/verify-code', async (req, res) => {
  * Handle Google One Tap sign-in
  * Verifies Google token and creates Supabase session
  */
-router.post('/google-signin', async (req, res) => {
+router.post('/google-signin', googleSigninBody, async (req, res) => {
   try {
     const { token, email, name } = req.body;
 
@@ -251,34 +218,53 @@ router.post('/google-signin', async (req, res) => {
     }
 
     // Initialize Supabase admin client
-    const supabaseUrl = process.env.SUPABASE_URL || 'https://cvsifkizrofmorvfmwmq.supabase.co';
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-    if (!supabaseServiceKey) {
-      console.error('⚠️ SUPABASE_SERVICE_ROLE_KEY not set in environment');
+    // Initialize singleton admin client
+    let supabase;
+    try {
+      supabase = getAdminClient();
+    } catch (e) {
+      console.error('⚠️ SUPABASE_SERVICE_ROLE_KEY not set in environment', e?.message || e);
       return res.status(500).json({
         error: 'Server configuration error',
         message: 'Missing Supabase service role key'
       });
     }
 
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    // Prefer checking our indexed `profiles` table by email.
+    // Use cache to reduce repeated lookups.
+    let existingAuthUser = null;
+    let existingProfile = null;
+    try {
+      const normalizedEmail = normalizeEmail(payload.email);
+      const cacheKey = `profile:email:${normalizedEmail}`;
+      existingProfile = await cache.get(cacheKey);
+      if (!existingProfile) {
+        const { data: profileData, error: profileErr } = await supabase
+          .from('profiles')
+          .select('id, email')
+          .eq('email', normalizedEmail)
+          .maybeSingle();
+        if (!profileErr && profileData) {
+          existingProfile = profileData;
+          await cache.set(cacheKey, existingProfile, 120);
+          console.log('✅ Profile found in cache/db for:', normalizedEmail);
+        } else if (profileErr) {
+          console.warn('profiles lookup error:', profileErr);
+        }
+      } else {
+        console.log('✅ Profile found in cache for:', normalizedEmail);
+      }
 
-    // Check if user exists
-    const { data: userList, error: userListError } = await supabase.auth.admin.listUsers({ page: 1, perPage: 100 });
-    if (userListError) {
-      console.error('❌ Database query error:', userListError);
-      return res.status(500).json({
-        error: 'Database error',
-        message: 'Failed to check existing user'
-      });
+      if (existingProfile) {
+        existingAuthUser = { id: existingProfile.id };
+      }
+    } catch (e) {
+      console.warn('Error checking existing profile:', e?.message || e);
     }
-
-    const existingUser = userList?.users?.find((user) => user.email?.toLowerCase() === payload.email?.toLowerCase()) || null;
 
     // Create or sign in user via Supabase
     let user;
-    if (!existingUser) {
+    if (!existingAuthUser) {
       console.log('📝 Creating new user:', payload.email);
       
       // Use Supabase admin API to create user
@@ -294,30 +280,32 @@ router.post('/google-signin', async (req, res) => {
       });
 
       if (createError) {
-        console.error('❌ User creation error:', createError);
-        return res.status(500).json({
-          error: 'Failed to create user',
-          message: createError.message
-        });
-      }
+        const createMessage = createError.message || String(createError);
+        const duplicateError = /email.*already.*exist|duplicate.*email|email.*registered/i.test(createMessage);
 
-      user = newUser.user;
-      console.log('✅ New user created:', user.id);
+        if (duplicateError) {
+          console.warn('⚠️ User already exists (duplicate email), proceeding with session creation:', createMessage);
+          user = { id: payload.email, email: payload.email };
+        } else {
+          console.error('❌ User creation error:', createError);
+          return res.status(500).json({
+            error: 'Failed to create user',
+            message: createMessage
+          });
+        }
+      } else {
+        user = newUser?.user;
+        if (!user) {
+          return res.status(500).json({
+            error: 'Failed to create user',
+            message: 'Supabase returned an invalid user object'
+          });
+        }
+        console.log('✅ New user created:', user.id);
+      }
     } else {
-      console.log('👤 User exists, fetching details...');
-      
-      // Get user details
-      const { data: userData, error: getUserError } = await supabase.auth.admin.getUserById(existingUser.id);
-      
-      if (getUserError) {
-        console.error('❌ Error fetching user:', getUserError);
-        return res.status(500).json({
-          error: 'Failed to fetch user',
-          message: getUserError.message
-        });
-      }
-
-      user = userData.user;
+      console.log('✅ User exists, using cached profile');
+      user = existingAuthUser;
     }
 
     // Create a direct Supabase session by exchanging the Google ID token.
@@ -343,6 +331,80 @@ router.post('/google-signin', async (req, res) => {
     }
 
     console.log('✅ Session tokens generated successfully');
+    console.log('🔍 User ID from OAuth:', signInData.user.id);
+    console.log('📧 Email from OAuth:', signInData.user.email);
+
+    // Check if the user (by their actual Supabase ID) has a profile row
+    let hasProfile = false;
+    let profileState = null;
+    try {
+      console.log('🔍 Looking for profile with ID:', signInData.user.id);
+      const { data: profileExists, error: profileCheckError } = await supabase
+        .from('profiles')
+        .select('id, email, user_type')
+        .eq('id', signInData.user.id)
+        .maybeSingle();
+      
+      profileState = profileExists || null;
+      console.log('📋 Profile query result:', { profileExists, error: profileCheckError?.message });
+      
+      if (!profileCheckError && profileExists?.id) {
+        hasProfile = true;
+        console.log('✅ EXISTING PROFILE FOUND for user:', signInData.user.id);
+        console.log('ℹ️ Existing profile state: ', {
+          id: profileExists.id,
+          email: profileExists.email,
+          user_type: profileExists.user_type,
+          onboardingComplete: Boolean(profileExists.user_type),
+        });
+      } else if (!profileCheckError) {
+        console.log('⚠️ NO PROFILE FOUND for user ID:', signInData.user.id);
+        console.log('📝 Creating profile automatically for user:', signInData.user.id);
+        
+        // Auto-create a profile for the user
+        const profileName = payload.name || signInData.user.email?.split('@')[0] || 'User';
+        const { data: newProfile, error: createProfileError } = await supabase
+          .from('profiles')
+          .insert([{
+            id: signInData.user.id,
+            email: signInData.user.email,
+            full_name: profileName,
+            user_type: null, // Will be set during onboarding
+            avatar_url: payload.picture || null,
+            created_at: new Date().toISOString(),
+          }])
+          .select('id, email, user_type')
+          .single();
+        
+        if (createProfileError) {
+          console.error('❌ Error creating profile:', createProfileError?.message);
+        } else {
+          profileState = newProfile || null;
+          hasProfile = true;
+          console.log('✅ NEW PROFILE CREATED for user:', signInData.user.id);
+          console.log('ℹ️ New profile state: ', {
+            id: newProfile?.id ?? null,
+            email: newProfile?.email ?? null,
+            user_type: newProfile?.user_type ?? null,
+            onboardingComplete: Boolean(newProfile?.user_type),
+          });
+        }
+      } else {
+        console.warn('⚠️ Error checking profile:', profileCheckError?.message);
+      }
+    } catch (profileCheckErr) {
+      console.error('❌ Unexpected error during profile check:', profileCheckErr);
+    }
+
+    console.log('📤 Sending response with hasProfile:', hasProfile);
+    console.log('📦 Response payload:', {
+      userId: signInData.user.id,
+      email: signInData.user.email,
+      hasProfile,
+      userType: profileState?.user_type ?? null,
+      profileId: profileState?.id ?? null,
+      profileEmail: profileState?.email ?? null,
+    });
 
     res.json({
       user: {
@@ -356,6 +418,8 @@ router.post('/google-signin', async (req, res) => {
         token_type: signInData.session.token_type,
         expires_in: signInData.session.expires_in,
       },
+      hasProfile: hasProfile,
+      user_type: profileState?.user_type ?? null,
       message: 'User signed in successfully'
     });
 
