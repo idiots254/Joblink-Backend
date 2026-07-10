@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const { verifyGoogleEmail, sendVerificationCode, verifyCode } = require('../config/emailVerification');
 const { getAdminClient } = require('../supabaseAdmin');
-const cache = require('../cache');
 const { emailBody, codeBody, googleSigninBody } = require('../middleware/validators');
 const { OAuth2Client } = require('google-auth-library');
 
@@ -218,7 +217,6 @@ router.post('/google-signin', googleSigninBody, async (req, res) => {
     }
 
     // Initialize Supabase admin client
-    // Initialize singleton admin client
     let supabase;
     try {
       supabase = getAdminClient();
@@ -230,89 +228,21 @@ router.post('/google-signin', googleSigninBody, async (req, res) => {
       });
     }
 
-    // Prefer checking our indexed `profiles` table by email.
-    // Use cache to reduce repeated lookups.
-    let existingAuthUser = null;
-    let existingProfile = null;
-    try {
-      const normalizedEmail = normalizeEmail(payload.email);
-      const cacheKey = `profile:email:${normalizedEmail}`;
-      existingProfile = await cache.get(cacheKey);
-      if (!existingProfile) {
-        const { data: profileData, error: profileErr } = await supabase
-          .from('profiles')
-          .select('id, email')
-          .eq('email', normalizedEmail)
-          .maybeSingle();
-        if (!profileErr && profileData) {
-          existingProfile = profileData;
-          await cache.set(cacheKey, existingProfile, 120);
-          console.log('✅ Profile found in cache/db for:', normalizedEmail);
-        } else if (profileErr) {
-          console.warn('profiles lookup error:', profileErr);
-        }
-      } else {
-        console.log('✅ Profile found in cache for:', normalizedEmail);
-      }
+    const normalizedEmail = normalizeEmail(payload.email || email || name);
 
-      if (existingProfile) {
-        existingAuthUser = { id: existingProfile.id };
-      }
-    } catch (e) {
-      console.warn('Error checking existing profile:', e?.message || e);
-    }
-
-    // Create or sign in user via Supabase
-    let user;
-    if (!existingAuthUser) {
-      console.log('📝 Creating new user:', payload.email);
-      
-      // Use Supabase admin API to create user
-      const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
-        email: payload.email,
-        user_metadata: {
-          name: payload.name || name,
-          displayName: payload.name || name,
-          avatar_url: payload.picture,
-          provider: 'google',
-        },
-        email_confirm: true,
-      });
-
-      if (createError) {
-        const createMessage = createError.message || String(createError);
-        const duplicateError = /email.*already.*exist|duplicate.*email|email.*registered/i.test(createMessage);
-
-        if (duplicateError) {
-          console.warn('⚠️ User already exists (duplicate email), proceeding with session creation:', createMessage);
-          user = { id: payload.email, email: payload.email };
-        } else {
-          console.error('❌ User creation error:', createError);
-          return res.status(500).json({
-            error: 'Failed to create user',
-            message: createMessage
-          });
-        }
-      } else {
-        user = newUser?.user;
-        if (!user) {
-          return res.status(500).json({
-            error: 'Failed to create user',
-            message: 'Supabase returned an invalid user object'
-          });
-        }
-        console.log('✅ New user created:', user.id);
-      }
-    } else {
-      console.log('✅ User exists, using cached profile');
-      user = existingAuthUser;
-    }
-
-    // Create a direct Supabase session by exchanging the Google ID token.
-    const { data: signInData, error: signInError } = await supabase.auth.signInWithIdToken({
-      provider: 'google',
-      token,
-    });
+    // Run the session creation and a lightweight profile lookup in parallel
+    // so the response is not blocked by extra database work.
+    const [{ data: signInData, error: signInError }, { data: profileData, error: profileCheckError }] = await Promise.all([
+      supabase.auth.signInWithIdToken({
+        provider: 'google',
+        token,
+      }),
+      supabase
+        .from('profiles')
+        .select('id, email, user_type')
+        .eq('email', normalizedEmail)
+        .maybeSingle(),
+    ]);
 
     if (signInError) {
       console.error('❌ Session generation error:', signInError);
@@ -334,61 +264,16 @@ router.post('/google-signin', googleSigninBody, async (req, res) => {
     console.log('🔍 User ID from OAuth:', signInData.user.id);
     console.log('📧 Email from OAuth:', signInData.user.email);
 
-    // Check if the user (by their actual Supabase ID) has a profile row
+    // Use a lightweight profile lookup to decide routing without blocking sign-in.
     let hasProfile = false;
     let profileState = null;
     try {
-      console.log('🔍 Looking for profile with ID:', signInData.user.id);
-      const { data: profileExists, error: profileCheckError } = await supabase
-        .from('profiles')
-        .select('id, email, user_type')
-        .eq('id', signInData.user.id)
-        .maybeSingle();
-      
-      profileState = profileExists || null;
-      console.log('📋 Profile query result:', { profileExists, error: profileCheckError?.message });
-      
-      if (!profileCheckError && profileExists?.id) {
+      profileState = profileData || null;
+      if (!profileCheckError && profileData?.id) {
         hasProfile = true;
-        console.log('✅ EXISTING PROFILE FOUND for user:', signInData.user.id);
-        console.log('ℹ️ Existing profile state: ', {
-          id: profileExists.id,
-          email: profileExists.email,
-          user_type: profileExists.user_type,
-          onboardingComplete: Boolean(profileExists.user_type),
-        });
+        console.log('✅ Profile found for user:', signInData.user.id, 'email:', normalizedEmail);
       } else if (!profileCheckError) {
-        console.log('⚠️ NO PROFILE FOUND for user ID:', signInData.user.id);
-        console.log('📝 Creating profile automatically for user:', signInData.user.id);
-        
-        // Auto-create a profile for the user
-        const profileName = payload.name || signInData.user.email?.split('@')[0] || 'User';
-        const { data: newProfile, error: createProfileError } = await supabase
-          .from('profiles')
-          .insert([{
-            id: signInData.user.id,
-            email: signInData.user.email,
-            full_name: profileName,
-            user_type: null, // Will be set during onboarding
-            avatar_url: payload.picture || null,
-            created_at: new Date().toISOString(),
-          }])
-          .select('id, email, user_type')
-          .single();
-        
-        if (createProfileError) {
-          console.error('❌ Error creating profile:', createProfileError?.message);
-        } else {
-          profileState = newProfile || null;
-          hasProfile = true;
-          console.log('✅ NEW PROFILE CREATED for user:', signInData.user.id);
-          console.log('ℹ️ New profile state: ', {
-            id: newProfile?.id ?? null,
-            email: newProfile?.email ?? null,
-            user_type: newProfile?.user_type ?? null,
-            onboardingComplete: Boolean(newProfile?.user_type),
-          });
-        }
+        console.log('⚠️ No profile found yet for user:', signInData.user.id, 'email:', normalizedEmail);
       } else {
         console.warn('⚠️ Error checking profile:', profileCheckError?.message);
       }

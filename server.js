@@ -13,6 +13,7 @@ console.log(`✅ Loaded env files: ${backendEnvPath}${process.env.PORT ? '' : ` 
 // Import routes
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
+const accountRoutes = require('./routes/account');
 const feedbackRoutes = require('./routes/feedback');
 const utilsRoutes = require('./routes/utils');
 const { authLimiter } = require('./middleware/rateLimiter');
@@ -34,6 +35,7 @@ app.use(slowLogger(200));
 // Routes
 // Apply conservative rate limits to auth endpoints to reduce abusive traffic
 app.use('/api/auth', authLimiter, authRoutes);
+app.use('/api/account', accountRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/utils', utilsRoutes);
