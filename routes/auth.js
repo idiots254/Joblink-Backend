@@ -4,6 +4,7 @@ const { verifyGoogleEmail, sendVerificationCode, verifyCode } = require('../conf
 const { getAdminClient } = require('../supabaseAdmin');
 const { emailBody, codeBody, googleSigninBody } = require('../middleware/validators');
 const { OAuth2Client } = require('google-auth-library');
+const { buildGoogleAudienceList } = require('../config/googleClients');
 
 const normalizeEmail = (email) => String(email || '').toLowerCase().trim();
 
@@ -168,14 +169,8 @@ router.post('/google-signin', googleSigninBody, async (req, res) => {
       });
     }
 
-    // Verify Google token against allowed OAuth client IDs.
-    const googleClientIds = [
-      process.env.GOOGLE_CLIENT_ID || '541772603049-qame2cc6bub14oag2f6lbr9oe3i1q8sm.apps.googleusercontent.com',
-    ];
-    if (process.env.GOOGLE_ANDROID_CLIENT_ID) {
-      googleClientIds.push(process.env.GOOGLE_ANDROID_CLIENT_ID);
-    }
-
+    // Verify Google token against the web and Android OAuth client IDs used by the app.
+    const googleClientIds = buildGoogleAudienceList(process.env);
     const googleClient = new OAuth2Client(googleClientIds[0]);
 
     // Decode token payload to log the audience (helps debug audience mismatches)

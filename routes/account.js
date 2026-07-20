@@ -5,22 +5,25 @@ const { getAdminClient } = require('../supabaseAdmin');
 const AVATAR_BUCKET = 'user-avatars';
 const MEDIA_BUCKET = 'media_files';
 
-const ensureBucketExists = async (supabase, bucketName) => {
-  const { data, error } = await supabase.storage.getBucket(bucketName);
-  if (!error) {
-    return data;
-  }
+const BUCKET_ALIASES = {
+  'user-avatars': ['user_avatars'],
+  media_files: ['media-files'],
+};
 
-  const message = String(error?.message || '').toLowerCase();
-  if (message.includes('not found') || message.includes('does not exist')) {
-    const { data: created, error: createError } = await supabase.storage.createBucket(bucketName, { public: true });
-    if (createError) {
-      throw createError;
+const resolveStorageBucket = async (supabase, bucketName) => {
+  const aliases = BUCKET_ALIASES[bucketName] || [];
+  const candidates = [bucketName, ...aliases];
+  let lastError = null;
+
+  for (const candidate of candidates) {
+    const { data, error } = await supabase.storage.getBucket(candidate);
+    if (!error && data) {
+      return candidate;
     }
-    return created;
+    lastError = error;
   }
 
-  throw error;
+  throw lastError || new Error(`Storage bucket not found: ${bucketName}`);
 };
 
 const sanitizeFileName = (fileName = 'file') => {
@@ -348,7 +351,8 @@ router.post('/delete', authenticateUser, async (req, res) => {
           // Delete from avatar bucket
           const avatarFiles = mediaFilesToDelete.filter(f => f.includes('avatars'));
           if (avatarFiles.length > 0) {
-            await supabase.storage.from(AVATAR_BUCKET).remove(avatarFiles).catch(err => {
+            const resolvedAvatarBucket = await resolveStorageBucket(supabase, AVATAR_BUCKET);
+            await supabase.storage.from(resolvedAvatarBucket).remove(avatarFiles).catch(err => {
               console.warn('[DELETE account] Avatar deletion warning:', err.message);
             });
           }
@@ -356,7 +360,8 @@ router.post('/delete', authenticateUser, async (req, res) => {
           // Delete from media bucket
           const mediaFiles = mediaFilesToDelete.filter(f => !f.includes('avatars'));
           if (mediaFiles.length > 0) {
-            await supabase.storage.from(MEDIA_BUCKET).remove(mediaFiles).catch(err => {
+            const resolvedMediaBucket = await resolveStorageBucket(supabase, MEDIA_BUCKET);
+            await supabase.storage.from(resolvedMediaBucket).remove(mediaFiles).catch(err => {
               console.warn('[DELETE account] Media deletion warning:', err.message);
             });
           }
@@ -449,8 +454,9 @@ router.post('/avatar-upload', authenticateUser, async (req, res) => {
     const supabase = getAdminClient();
 
     const buffer = Buffer.from(base64, 'base64');
+    const uploadBucket = await resolveStorageBucket(supabase, AVATAR_BUCKET);
     const { data, error } = await supabase.storage
-      .from(AVATAR_BUCKET)
+      .from(uploadBucket)
       .upload(path, buffer, {
         cacheControl: '3600',
         upsert: true,
@@ -463,7 +469,7 @@ router.post('/avatar-upload', authenticateUser, async (req, res) => {
     }
 
     const { data: publicUrlData, error: urlError } = supabase.storage
-      .from(AVATAR_BUCKET)
+      .from(uploadBucket)
       .getPublicUrl(path);
 
     if (urlError) {
@@ -497,8 +503,9 @@ router.post('/media-upload', authenticateUser, async (req, res) => {
     const supabase = getAdminClient();
 
     const buffer = Buffer.from(base64, 'base64');
+    const uploadBucket = await resolveStorageBucket(supabase, MEDIA_BUCKET);
     const { data, error } = await supabase.storage
-      .from(MEDIA_BUCKET)
+      .from(uploadBucket)
       .upload(path, buffer, {
         cacheControl: '3600',
         upsert: true,
@@ -511,7 +518,7 @@ router.post('/media-upload', authenticateUser, async (req, res) => {
     }
 
     const { data: publicUrlData, error: urlError } = supabase.storage
-      .from(MEDIA_BUCKET)
+      .from(uploadBucket)
       .getPublicUrl(path);
 
     if (urlError) {
