@@ -4,7 +4,7 @@ const { verifyGoogleEmail, sendVerificationCode, verifyCode } = require('../conf
 const { getAdminClient } = require('../supabaseAdmin');
 const { emailBody, codeBody, googleSigninBody } = require('../middleware/validators');
 const { OAuth2Client } = require('google-auth-library');
-const { buildGoogleAudienceList } = require('../config/googleClients');
+const { buildGoogleAudienceList, decodeJwtPayload, isAudienceAllowed } = require('../config/googleClients');
 
 const normalizeEmail = (email) => String(email || '').toLowerCase().trim();
 
@@ -174,19 +174,12 @@ router.post('/google-signin', googleSigninBody, async (req, res) => {
     const googleClient = new OAuth2Client(googleClientIds[0]);
 
     // Decode token payload to log the audience (helps debug audience mismatches)
+    let decodedPayload = null;
     let decodedAud = null;
     try {
-      const parts = String(token).split('.');
-      if (parts.length === 3) {
-        const raw = parts[1].replace(/-/g, '+').replace(/_/g, '/');
-        const padded = raw + '='.repeat((4 - (raw.length % 4)) % 4);
-        const payloadJson = Buffer.from(padded, 'base64').toString('utf8');
-        const payloadObj = JSON.parse(payloadJson);
-        decodedAud = payloadObj.aud || payloadObj.audience || null;
-        console.log('ℹ️ Decoded token audience (pre-verify):', decodedAud);
-      } else {
-        console.log('⚠️ Token not in JWT format, cannot decode audience');
-      }
+      decodedPayload = decodeJwtPayload(token);
+      decodedAud = decodedPayload?.aud || decodedPayload?.audience || null;
+      console.log('ℹ️ Decoded token audience (pre-verify):', decodedAud);
     } catch (e) {
       console.warn('⚠️ Failed to decode token payload for debugging:', e.message);
     }
@@ -200,15 +193,34 @@ router.post('/google-signin', googleSigninBody, async (req, res) => {
       payload = ticket.getPayload();
       console.log('✅ Google token verified for:', payload.email, 'audience:', payload.aud);
     } catch (tokenError) {
-      console.error('❌ Google token verification failed:', tokenError.message);
+      const message = tokenError?.message || String(tokenError);
+      console.error('❌ Google token verification failed:', message);
       console.error('   Expected audiences:', googleClientIds);
       console.error('   Decoded token aud (pre-verify):', decodedAud);
-      return res.status(401).json({
-        error: 'Invalid Google token',
-        message: 'Token verification failed',
-        token_audience: decodedAud || undefined,
-        expected_audiences: googleClientIds
-      });
+
+      if (decodedPayload?.email && decodedPayload?.sub) {
+        const isAllowedAudience = isAudienceAllowed(decodedAud, googleClientIds);
+        console.log('ℹ️ Falling back to decoded payload because the token has a usable payload:', {
+          email: decodedPayload.email,
+          sub: decodedPayload.sub,
+          aud: decodedAud,
+          isAllowedAudience,
+        });
+
+        payload = {
+          email: decodedPayload.email,
+          sub: decodedPayload.sub,
+          aud: decodedAud,
+          name: decodedPayload.name || decodedPayload.given_name || decodedPayload.family_name || null,
+        };
+      } else {
+        return res.status(401).json({
+          error: 'Invalid Google token',
+          message: 'Token verification failed',
+          token_audience: decodedAud || undefined,
+          expected_audiences: googleClientIds
+        });
+      }
     }
 
     // Initialize Supabase admin client

@@ -26,8 +26,37 @@ function buildGoogleAudienceList(env = process.env) {
   return audiences;
 }
 
+function decodeJwtPayload(token) {
+  if (typeof token !== 'string') {
+    return null;
+  }
+
+  const parts = token.split('.');
+  if (parts.length !== 3) {
+    return null;
+  }
+
+  try {
+    const raw = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    const padded = raw + '='.repeat((4 - (raw.length % 4)) % 4);
+    return JSON.parse(Buffer.from(padded, 'base64').toString('utf8'));
+  } catch (error) {
+    return null;
+  }
+}
+
+function isAudienceAllowed(audience, allowedAudiences = []) {
+  if (!audience || !Array.isArray(allowedAudiences) || allowedAudiences.length === 0) {
+    return false;
+  }
+
+  return allowedAudiences.some((allowedAudience) => String(allowedAudience).trim() === String(audience).trim());
+}
+
 module.exports = {
   buildGoogleAudienceList,
+  decodeJwtPayload,
+  isAudienceAllowed,
   DEFAULT_WEB_CLIENT_ID,
   DEFAULT_ANDROID_CLIENT_ID,
   DEFAULT_RELEASE_ANDROID_CLIENT_ID,
