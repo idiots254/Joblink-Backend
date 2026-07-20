@@ -16,6 +16,13 @@ const adminRoutes = require('./routes/admin');
 const accountRoutes = require('./routes/account');
 const feedbackRoutes = require('./routes/feedback');
 const utilsRoutes = require('./routes/utils');
+// Debug routes for auth inspection (only enabled on server side)
+let debugAuthRoutes;
+try {
+  debugAuthRoutes = require('./routes/debug-auth');
+} catch (e) {
+  debugAuthRoutes = null;
+}
 const { authLimiter } = require('./middleware/rateLimiter');
 const { metricsMiddleware, register } = require('./metrics');
 const { getAdminClient } = require('./supabaseAdmin');
@@ -27,7 +34,7 @@ cache.initializeRedis().catch(() => {});
 
 // Middleware
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
 app.use(metricsMiddleware);
 const slowLogger = require('./middleware/slowLogger');
 app.use(slowLogger(200));
@@ -39,6 +46,7 @@ app.use('/api/account', accountRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/utils', utilsRoutes);
+if (debugAuthRoutes) app.use('/api/debug-auth', debugAuthRoutes);
 
 // Server-side realtime listener: invalidate cache when follows change
 try {
@@ -83,6 +91,14 @@ app.get('/health', (req, res) => {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
+  if (err && err.type === 'entity.too.large') {
+    console.warn('PayloadTooLargeError:', err.message);
+    return res.status(413).json({
+      error: 'Payload too large',
+      message: err.message
+    });
+  }
+
   console.error('Error:', err);
   res.status(500).json({ 
     error: 'Internal server error',

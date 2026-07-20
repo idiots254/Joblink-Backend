@@ -2,6 +2,36 @@ const express = require('express');
 const router = express.Router();
 const { getAdminClient } = require('../supabaseAdmin');
 
+const AVATAR_BUCKET = 'user-avatars';
+const MEDIA_BUCKET = 'media_files';
+
+const ensureBucketExists = async (supabase, bucketName) => {
+  const { data, error } = await supabase.storage.getBucket(bucketName);
+  if (!error) {
+    return data;
+  }
+
+  const message = String(error?.message || '').toLowerCase();
+  if (message.includes('not found') || message.includes('does not exist')) {
+    const { data: created, error: createError } = await supabase.storage.createBucket(bucketName, { public: true });
+    if (createError) {
+      throw createError;
+    }
+    return created;
+  }
+
+  throw error;
+};
+
+const sanitizeFileName = (fileName = 'file') => {
+  const baseName = String(fileName).replace(/\\/g, '/').split('/').pop() || 'file';
+  return baseName
+    .normalize('NFKD')
+    .replace(/[^a-zA-Z0-9._-]/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^_+|_+$/g, '') || 'file';
+};
+
 const getSupabaseApiKey = () => {
   return process.env.SUPABASE_ANON_KEY || process.env.REACT_APP_SUPABASE_ANON_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
 };
@@ -44,14 +74,51 @@ const verifySupabaseToken = async (token) => {
   }
 
   const supabaseUrl = process.env.SUPABASE_URL || 'https://cvsifkizrofmorvfmwmq.supabase.co';
-  const response = await fetch(`${supabaseUrl}/auth/v1/user`, {
-    method: 'GET',
-    headers: {
-      'apikey': apiKey,
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
+
+  // Helper: fetch with timeout and a couple retries to avoid transient ECONNRESET
+  const fetchWithTimeout = async (url, opts = {}, timeoutMs = 3000, retries = 1) => {
+    const attempt = async () => {
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        const res = await fetch(url, { ...opts, signal: controller.signal });
+        clearTimeout(id);
+        return res;
+      } catch (err) {
+        clearTimeout(id);
+        throw err;
+      }
+    };
+
+    let lastErr;
+    for (let i = 0; i <= retries; i += 1) {
+      try {
+        return await attempt();
+      } catch (e) {
+        lastErr = e;
+        // on last attempt, rethrow
+        if (i === retries) throw lastErr;
+        // small backoff before retrying
+        await new Promise((r) => setTimeout(r, 150 * (i + 1)));
+      }
     }
-  });
+    throw lastErr;
+  };
+
+  let response;
+  try {
+    response = await fetchWithTimeout(`${supabaseUrl}/auth/v1/user`, {
+      method: 'GET',
+      headers: {
+        apikey: apiKey,
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    }, 4000, 2);
+  } catch (err) {
+    console.warn('[verifySupabaseToken] Supabase fetch failed:', err?.message || err);
+    throw new Error('Auth lookup failed (network)');
+  }
 
   const payload = await response.json().catch(() => null);
   if (!response.ok) {
@@ -281,7 +348,7 @@ router.post('/delete', authenticateUser, async (req, res) => {
           // Delete from avatar bucket
           const avatarFiles = mediaFilesToDelete.filter(f => f.includes('avatars'));
           if (avatarFiles.length > 0) {
-            await supabase.storage.from('user-avatars').remove(avatarFiles).catch(err => {
+            await supabase.storage.from(AVATAR_BUCKET).remove(avatarFiles).catch(err => {
               console.warn('[DELETE account] Avatar deletion warning:', err.message);
             });
           }
@@ -289,7 +356,7 @@ router.post('/delete', authenticateUser, async (req, res) => {
           // Delete from media bucket
           const mediaFiles = mediaFilesToDelete.filter(f => !f.includes('avatars'));
           if (mediaFiles.length > 0) {
-            await supabase.storage.from('media-files').remove(mediaFiles).catch(err => {
+            await supabase.storage.from(MEDIA_BUCKET).remove(mediaFiles).catch(err => {
               console.warn('[DELETE account] Media deletion warning:', err.message);
             });
           }
@@ -362,6 +429,102 @@ router.post('/delete', authenticateUser, async (req, res) => {
   } catch (err) {
     console.error('[POST /account/delete] Unexpected error:', err.message);
     res.status(500).json({ error: 'Failed to delete account' });
+  }
+});
+
+/**
+ * POST /api/account/avatar-upload
+ * Upload avatar file to Supabase via server-side fallback.
+ */
+router.post('/avatar-upload', authenticateUser, async (req, res) => {
+  try {
+    const { filename, mimeType, base64 } = req.body || {};
+    if (!filename || !mimeType || !base64) {
+      return res.status(400).json({ error: 'filename, mimeType, and base64 are required' });
+    }
+
+    const safeFilename = sanitizeFileName(filename);
+    const timestamp = Date.now();
+    const path = `${req.userId}/${timestamp}-${safeFilename}`;
+    const supabase = getAdminClient();
+
+    const buffer = Buffer.from(base64, 'base64');
+    const { data, error } = await supabase.storage
+      .from(AVATAR_BUCKET)
+      .upload(path, buffer, {
+        cacheControl: '3600',
+        upsert: true,
+        contentType: mimeType,
+      });
+
+    if (error) {
+      console.error('[POST /avatar-upload] Supabase storage error:', error);
+      return res.status(500).json({ error: error.message || 'Avatar upload failed' });
+    }
+
+    const { data: publicUrlData, error: urlError } = supabase.storage
+      .from(AVATAR_BUCKET)
+      .getPublicUrl(path);
+
+    if (urlError) {
+      console.warn('[POST /avatar-upload] Public URL warning:', urlError);
+    }
+
+    return res.json({
+      path,
+      publicUrl: publicUrlData?.publicUrl || null,
+    });
+  } catch (err) {
+    console.error('[POST /avatar-upload] Unexpected error:', err.message);
+    return res.status(500).json({ error: 'Avatar upload failed' });
+  }
+});
+
+/**
+ * POST /api/account/media-upload
+ * Upload media file to Supabase via server-side fallback.
+ */
+router.post('/media-upload', authenticateUser, async (req, res) => {
+  try {
+    const { filename, mimeType, base64 } = req.body || {};
+    if (!filename || !mimeType || !base64) {
+      return res.status(400).json({ error: 'filename, mimeType, and base64 are required' });
+    }
+
+    const safeFilename = sanitizeFileName(filename);
+    const timestamp = Date.now();
+    const path = `${req.userId}/${timestamp}-${safeFilename}`;
+    const supabase = getAdminClient();
+
+    const buffer = Buffer.from(base64, 'base64');
+    const { data, error } = await supabase.storage
+      .from(MEDIA_BUCKET)
+      .upload(path, buffer, {
+        cacheControl: '3600',
+        upsert: true,
+        contentType: mimeType,
+      });
+
+    if (error) {
+      console.error('[POST /media-upload] Supabase storage error:', error);
+      return res.status(500).json({ error: error.message || 'Media upload failed' });
+    }
+
+    const { data: publicUrlData, error: urlError } = supabase.storage
+      .from(MEDIA_BUCKET)
+      .getPublicUrl(path);
+
+    if (urlError) {
+      console.warn('[POST /media-upload] Public URL warning:', urlError);
+    }
+
+    return res.json({
+      path,
+      publicUrl: publicUrlData?.publicUrl || null,
+    });
+  } catch (err) {
+    console.error('[POST /media-upload] Unexpected error:', err.message);
+    return res.status(500).json({ error: 'Media upload failed' });
   }
 });
 
