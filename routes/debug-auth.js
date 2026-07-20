@@ -59,3 +59,19 @@ router.post('/token-debug', async (req, res) => {
 });
 
 module.exports = router;
+
+// Extra debug route: expose Google audience list and lightweight runtime info
+try {
+  const { buildGoogleAudienceList } = require('../config/googleClients');
+  router.get('/google-audiences', (req, res) => {
+    try {
+      const audiences = buildGoogleAudienceList(process.env || {});
+      const commit = process.env.RENDER_GIT_COMMIT || process.env.GIT_COMMIT || process.env.COMMIT_SHA || null;
+      return res.json({ audiences, nodeEnv: process.env.NODE_ENV || null, commit });
+    } catch (e) {
+      return res.status(500).json({ error: e.message });
+    }
+  });
+} catch (e) {
+  // If googleClients is not available, skip adding the route
+}
