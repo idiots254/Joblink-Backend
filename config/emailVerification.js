@@ -3,8 +3,18 @@ const sgMail = require('@sendgrid/mail');
 const fs = require('fs');
 const path = require('path');
 
+const isValidSendGridApiKey = (value) => {
+  const normalized = String(value || '').trim();
+  if (!normalized || normalized.includes('PLACEHOLDER') || normalized.startsWith('<') || normalized.endsWith('>')) {
+    return false;
+  }
+
+  return /^SG\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(normalized);
+};
+
 const requestedEmailVerificationMethod = (process.env.EMAIL_VERIFICATION_METHOD || '').toLowerCase();
-const isSendGridConfigured = Boolean(process.env.SENDGRID_API_KEY);
+const hasSendGridKey = isValidSendGridApiKey(process.env.SENDGRID_API_KEY);
+const isSendGridConfigured = hasSendGridKey;
 const isGmailConfigured = Boolean(process.env.GMAIL_SEND_EMAIL && process.env.GMAIL_SEND_PASSWORD);
 
 let EMAIL_VERIFICATION_METHOD = requestedEmailVerificationMethod;
@@ -18,7 +28,7 @@ if (requestedEmailVerificationMethod === 'smtp' && !isGmailConfigured && isSendG
 }
 
 if (requestedEmailVerificationMethod === 'sendgrid' && !isSendGridConfigured && isGmailConfigured) {
-  console.warn('⚠️ SendGrid requested but SENDGRID_API_KEY is missing; falling back to SMTP because Gmail credentials are configured.');
+  console.warn('⚠️ SendGrid requested but SENDGRID_API_KEY is missing or invalid; falling back to SMTP because Gmail credentials are configured.');
   EMAIL_VERIFICATION_METHOD = 'smtp';
 }
 
@@ -124,6 +134,7 @@ const sendVerificationCode = async (email) => {
     console.log(`🔍 GMAIL_SEND_EMAIL: ${process.env.GMAIL_SEND_EMAIL ? '✅ SET' : '❌ NOT SET'}`);
     console.log(`🔍 GMAIL_SEND_PASSWORD: ${process.env.GMAIL_SEND_PASSWORD ? '✅ SET' : '❌ NOT SET'}`);
     console.log(`🔍 SENDGRID_API_KEY: ${process.env.SENDGRID_API_KEY ? '✅ SET' : '❌ NOT SET'}`);
+    console.log(`🔍 SENDGRID_API_KEY_FORMAT: ${isValidSendGridApiKey(process.env.SENDGRID_API_KEY) ? '✅ VALID' : '❌ INVALID'}`);
     console.log(`🔍 SENDGRID_FROM_EMAIL: ${process.env.SENDGRID_FROM_EMAIL ? '✅ SET' : '❌ NOT SET'}`);
 
     // Check if email is valid format first - allow +, -, ., _ and numbers
@@ -435,5 +446,6 @@ module.exports = {
   verifyCode,
   getCacheStats,
   pendingVerifications,
-  verifiedEmails
+  verifiedEmails,
+  isValidSendGridApiKey
 };
