@@ -196,16 +196,11 @@ const sendVerificationCode = async (email) => {
           console.error('❌ Failed to log SendGrid error details:', logErr);
         }
 
-        if (isGmailConfigured) {
-          console.warn('⚠️ SendGrid failed; falling back to Gmail SMTP because Gmail credentials are available.');
-          EMAIL_VERIFICATION_METHOD = 'smtp';
-        } else {
-          return {
-            success: false,
-            message: 'Failed to send email via SendGrid. Please check API key and sender settings.',
-            error: sendGridError.message || String(sendGridError)
-          };
-        }
+        return {
+          success: false,
+          message: 'Failed to send email via SendGrid. Please check the API key and verified sender.',
+          error: sendGridError.message || String(sendGridError)
+        };
       }
     }
 
