@@ -33,8 +33,10 @@ const app = express();
 cache.initializeRedis().catch(() => {});
 
 // Middleware
+app.set('trust proxy', 1);
 app.use(cors());
-app.use(express.json({ limit: '1mb' }));
+// Allow larger JSON payloads for base64 file uploads (avatar/media uploads)
+app.use(express.json({ limit: '100mb' }));
 app.use(metricsMiddleware);
 const slowLogger = require('./middleware/slowLogger');
 app.use(slowLogger(200));
