@@ -2490,9 +2490,10 @@ function UserAccountPanel({ onClose, selectedAccount, selectedAccountType, onPro
                             </span>
                           </button>
                           <input
-                            type="tel"
+                            type="number"
                             inputMode="numeric"
                             pattern="[0-9]*"
+                            step="1"
                             autoComplete="tel"
                             name="whatsappLocal"
                             value={whatsappLocalNumber}
@@ -2508,6 +2509,12 @@ function UserAccountPanel({ onClose, selectedAccount, selectedAccountType, onPro
                             }}
                             onBeforeInput={(e) => {
                               if (e.data && !/^\d*$/.test(e.data)) {
+                                e.preventDefault();
+                              }
+                            }}
+                            onPaste={(e) => {
+                              const pasted = e.clipboardData.getData('text');
+                              if (pasted && !/^\d*$/.test(pasted)) {
                                 e.preventDefault();
                               }
                             }}
@@ -3013,9 +3020,10 @@ function UserAccountPanel({ onClose, selectedAccount, selectedAccountType, onPro
                             </span>
                           </button>
                           <input
-                            type="tel"
+                            type="number"
                             inputMode="numeric"
                             pattern="[0-9]*"
+                            step="1"
                             autoComplete="tel"
                             name="whatsappLocalFull"
                             value={whatsappLocalNumber}
@@ -3031,6 +3039,12 @@ function UserAccountPanel({ onClose, selectedAccount, selectedAccountType, onPro
                             }}
                             onBeforeInput={(e) => {
                               if (e.data && !/^\d*$/.test(e.data)) {
+                                e.preventDefault();
+                              }
+                            }}
+                            onPaste={(e) => {
+                              const pasted = e.clipboardData.getData('text');
+                              if (pasted && !/^\d*$/.test(pasted)) {
                                 e.preventDefault();
                               }
                             }}
