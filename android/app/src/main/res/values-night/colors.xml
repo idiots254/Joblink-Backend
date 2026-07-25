@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark mode colors -->
+    <color name="colorPrimary">#0b1216</color>
+    <color name="colorPrimaryDark">#0b1216</color>
+    <color name="colorAccent">#00a884</color>
+    <color name="splashBackground">#0b1216</color>
+    <color name="splashLogoTint">#FFFFFF</color>
+    <color name="splashTextColor">#F5F5F5</color>
+    <color name="appBackground">#0b1216</color>
+</resources>

@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1053677464000",
+    "project_id": "joblink-2030",
+    "storage_bucket": "joblink-2030.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1053677464000:android:4b0ee2c6aa77fc20ca0025",
+        "android_client_info": {
+          "package_name": "com.joblink.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1053677464000-77e3jou8dc9sj8shav2hsp0ik4okj1ih.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.joblink.app",
+            "certificate_hash": "171dc8d9cc09d8e465eac9c771a7b01d132ea97c"
+          }
+        },
+        {
+          "client_id": "1053677464000-2sbmgpffk5qjtmpmtkj093uhkvrfnbsn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBGTcHmpdosuVxhyH6VrH-qpfwphDeQxiU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1053677464000-2sbmgpffk5qjtmpmtkj093uhkvrfnbsn.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Light mode colors (default for light theme) -->
+    <color name="colorPrimary">#FFFFFF</color>
+    <color name="colorPrimaryDark">#F5F5F5</color>
+    <color name="colorAccent">#00a884</color>
+    <color name="splashBackground">#FFFFFF</color>
+    <color name="splashLogoTint">#000000</color>
+    <color name="splashTextColor">#111111</color>
+    <color name="appBackground">#FFFFFF</color>
+    <color name="ic_launcher_background">#FFFFFF</color>
+</resources>

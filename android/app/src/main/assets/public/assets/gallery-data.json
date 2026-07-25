@@ -1,0 +1,54 @@
+{
+  "hero": [
+    {
+      "id": 1,
+      "title": "50K+ Jobs",
+      "image": "/assets/images/I1.jpg",
+      "type": "image"
+    },
+    {
+      "id": 2,
+      "title": "Growth Career",
+      "image": "/assets/images/I2.jpeg",
+      "type": "image"
+    },
+    {
+      "id": 3,
+      "title": "Perfect Match",
+      "image": "/assets/images/I1.jpg",
+      "type": "image"
+    },
+    {
+      "id": 4,
+      "title": "Top Rated",
+      "image": "/assets/images/I2.jpeg",
+      "type": "image"
+    }
+  ],
+  "features": [
+    {
+      "id": 1,
+      "title": "Browse Jobs",
+      "image": "/assets/images/I1.jpg",
+      "type": "image"
+    },
+    {
+      "id": 2,
+      "title": "Connect",
+      "image": "/assets/images/I2.jpeg",
+      "type": "image"
+    },
+    {
+      "id": 3,
+      "title": "Trending",
+      "image": "/assets/images/I1.jpg",
+      "type": "image"
+    },
+    {
+      "id": 4,
+      "title": "Quick Apply",
+      "image": "/assets/images/I2.jpeg",
+      "type": "image"
+    }
+  ]
+}

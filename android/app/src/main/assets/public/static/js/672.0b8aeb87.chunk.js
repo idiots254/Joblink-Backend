@@ -1,0 +1,2 @@
+"use strict";(globalThis.webpackChunkjoblink=globalThis.webpackChunkjoblink||[]).push([[672],{8672(e,b,n){n.r(b),n.d(b,{Browser:()=>s});const s=(0,n(5403).F3)("Browser",{web:()=>n.e(842).then(n.bind(n,7842)).then(e=>new e.BrowserWeb)})}}]);
+//# sourceMappingURL=672.0b8aeb87.chunk.js.map

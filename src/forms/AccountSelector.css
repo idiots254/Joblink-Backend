@@ -1,0 +1,605 @@
+
+/* ========== ACCOUNT SELECTOR STYLES ========== */
+
+.account-type-page {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--bg-primary);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  z-index: 9999;
+  color: var(--text-primary);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.account-type-page::after {
+  content: '';
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: -3px;
+  height: 3px;
+  background: var(--bg-primary);
+  z-index: 9998;
+}
+
+
+.page-content {
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  padding: 24px 16px 100px;
+  margin: 0;
+  box-sizing: border-box;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+
+.simple-header {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.simple-header h2 {
+  font-size: 1.15rem;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.step-pill .selected-account-type {
+  font-size: 0.55rem;
+  color: var(--text-secondary);
+  margin-left: 4px;
+  font-weight: 500;
+}
+
+.step-pill {
+  display: inline-flex;
+  padding: 3px 6px;
+  border-radius: 999px;
+  background: rgba(86, 200, 255, 0.08);
+  color: #56c8ff;
+  font-weight: 700;
+  font-size: 0.48rem;
+  margin-bottom: 10px;
+}
+
+
+.role-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  width: 100%;
+  padding: 0 16px;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+
+.role-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+  border: none;
+  padding: 24px 18px;
+  border-radius: 18px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  width: 100%;
+  min-height: 180px;
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+}
+
+.role-card::before {
+  display: none;
+}
+
+.role-card::after {
+  display: none;
+}
+
+.role-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15);
+}
+
+.role-card:active {
+  transform: translateY(-4px);
+}
+
+
+.role-card--selected {
+  background: rgba(34, 197, 94, 0.12);
+  box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.25);
+}
+
+.role-card--selected .role-icon {
+  transform: scale(1.04);
+}
+
+.role-card--selected .role-card-title,
+.role-card--selected .role-card-description {
+  color: #22c55e;
+}
+
+.role-icon {
+  font-size: 44px;
+  color: #fff;
+  width: 88px;
+  height: 88px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #56c8ff;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  z-index: 1;
+}
+
+.role-card-check {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 20px;
+  height: 20px;
+  color: #22c55e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: checkPop 0.2s ease-out;
+}
+
+.role-card-check svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+@keyframes checkPop {
+  0% {
+    transform: scale(0.7);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.role-card:hover .role-icon {
+  transform: scale(1.12) rotateZ(-8deg);
+}
+
+
+.role-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+}
+
+
+.role-card-title {
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: var(--text-primary);
+}
+
+.role-card-description {
+  font-size: 0.68rem;
+  color: var(--text-secondary);
+  line-height: 1.2;
+}
+
+
+.sector-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, 1fr);
+  justify-items: center;
+  width: 100%;
+  max-width: none;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+
+.sector-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  width: 100%;
+  max-width: none;
+  padding: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.18s ease;
+  text-align: center;
+  color: inherit;
+}
+
+.sector-card-circle {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+}
+
+
+.sector-card-icon-wrap {
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.14);
+}
+
+.sector-card-label {
+  font-size: 11px;
+  line-height: 1;
+  margin-top: -5px;
+  padding-top: 0;
+}
+
+.search-highlight {
+  color: #56c8ff;
+  font-weight: 700;
+}
+
+
+.sector-card-icon {
+  font-size: 1.4rem;
+  color: #fff;
+}
+
+
+.sector-card-title {
+  font-weight: 700;
+  font-size: 0.98rem;
+  line-height: 1.2;
+}
+
+.sector-card-description {
+  margin-top: 8px;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  max-height: 5.2em;
+  overflow: hidden;
+}
+
+.back-button {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  background: transparent;
+  border: none;
+  padding: 6px 0;
+}
+
+.coming-soon-card {
+  padding: 18px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  border-radius: 10px;
+  border: none;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.03);
+}
+
+
+.sector-search-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2px 12px 4px;
+  margin: 0 0 4px 0;
+  width: 100%;
+  background: transparent;
+  box-sizing: border-box;
+}
+
+.sector-search-input {
+  width: min(100%, 380px);
+  border: none;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-primary);
+  border-radius: 999px;
+  padding: 10px 14px;
+  font-size: 0.92rem;
+  outline: none;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.sector-search-input::placeholder {
+  color: var(--text-secondary);
+}
+
+.birthday-step-simple {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.birthday-step-blocked {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.birthday-step-description {
+  margin: 0 0 6px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.birthday-step-lock-note {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #ff6b6b;
+  text-align: center;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.birthday-step-card {
+  display: none;
+}
+
+.birthday-step-hero {
+  display: none;
+}
+
+.birthday-step-icon {
+  display: none;
+}
+
+.birthday-step-header-text {
+  display: none;
+}
+
+.birthday-step-footer {
+  display: none;
+}
+
+.birthday-step-note {
+  display: none;
+}
+
+.birthday-picker-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: min(100%, 300px);
+  border: none;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  transition: background 0.2s ease;
+  align-self: center;
+}
+
+.birthday-picker-trigger:disabled,
+.birthday-picker-trigger[aria-disabled='true'] {
+  opacity: 0.55;
+  cursor: not-allowed;
+  background: rgba(255, 255, 255, 0.05);
+  pointer-events: none;
+}
+
+.birthday-picker-chevron {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.birthday-picker-chevron svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+  display: block;
+}
+
+.birthday-picker-trigger:hover {
+  background: rgba(255, 255, 255, 0.11);
+}
+
+.birthday-picker-label {
+  display: none;
+}
+
+.birthday-picker-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.birthday-step-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.birthday-step-note {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+
+.birthday-step-continue {
+  align-self: flex-end;
+  margin-top: 12px;
+  border: none;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #56c8ff;
+  background: transparent;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.birthday-manual-input-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: min(100%, 300px);
+  align-self: center;
+}
+
+.birthday-manual-age-input {
+  width: 100%;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.birthday-step-continue:hover:not(:disabled) {
+  transform: translateY(-1px);
+  opacity: 0.9;
+}
+
+.birthday-step-continue:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  color: #7ab8d4;
+}
+
+/* Mobile adjustments */
+@media (max-width: 600px) {
+  .account-type-page {
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 42px;
+    padding-bottom: 24px;
+  }
+
+  .account-type-page::after {
+    content: '';
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 40px;
+    background: var(--bg-primary);
+    z-index: 9998;
+    pointer-events: none;
+  }
+
+  .page-content {
+    width: 100%;
+    padding: 16px 0 24px;
+    margin: 0;
+  }
+
+  .simple-header {
+    margin-bottom: 16px;
+  }
+
+  .step-pill {
+    margin-bottom: 12px;
+  }
+
+  .role-choice-grid {
+    padding: 0 12px;
+  }
+
+  .role-card {
+    min-height: auto;
+    padding: 16px 14px;
+    border-radius: 10px;
+    gap: 14px;
+  }
+
+  .role-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 28px;
+  }
+
+  .role-card-title {
+    font-size: 1rem;
+  }
+
+  .role-card-description {
+    font-size: 0.62rem;
+    line-height: 1.15;
+  }
+
+  .sector-card {
+    width: 100%;
+    max-width: none;
+    padding: 8px 0;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.18s ease;
+    text-align: center;
+    color: inherit;
+  }
+
+  .sector-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .birthday-step-card {
+    padding: 20px 16px;
+    border-radius: 20px;
+  }
+
+  .birthday-step-hero {
+    gap: 12px;
+  }
+
+  .birthday-step-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+  }
+
+  .birthday-step-header-text p {
+    font-size: 0.86rem;
+  }
+}

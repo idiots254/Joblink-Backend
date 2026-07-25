@@ -1,0 +1,35 @@
+import type { CapacitorConfig } from '@capacitor/cli';
+
+const config: CapacitorConfig = {
+  appId: 'com.joblink.app',
+  appName: 'Joblink',
+  webDir: 'build',
+  // No server config - loads from bundled assets
+  plugins: {
+    SplashScreen: {
+      launchShowDuration: 800,
+      launchAutoHide: true,
+      backgroundColor: '#FFFFFF',
+      showSpinner: false,
+    },
+    StatusBar: {
+      style: 'DARK',
+      backgroundColor: '#0b1216'
+    },
+    NavigationBar: {
+      color: '#0b1216',
+      darkButtons: false
+    },
+    Camera: {
+      permissions: ['photos', 'camera']
+    },
+    Geolocation: {
+      permissions: ['coarseLocation', 'fineLocation']
+    },
+    'cordova-plugin-googleplus': {
+      REVERSED_CLIENT_ID: 'com.googleusercontent.apps.1053677464000-2sbmgpffk5qjtmpmtkj093uhkvrfnbsn'
+    }
+  }
+};
+
+export default config;

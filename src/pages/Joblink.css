@@ -1,0 +1,605 @@
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+button {
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+button:focus,
+button:active,
+button:focus-visible,
+button:focus-within {
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-outline: none !important;
+}
+
+/* Disable all focus rings globally */
+*:focus,
+*:active,
+*:focus-visible,
+*:focus-within {
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-outline: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+/* Light Mode Styles */
+[data-theme="light"] {
+  --bg-primary: #f8f8f7;
+  --bg-secondary: #f0f0ef;
+  --bg-card: #fcfcfb;
+  --text-primary: #0b1216;
+  --text-secondary: #0b1216;
+  --border-color: #d0d0d0;
+  --accent-color: #00a844;
+}
+
+/* Dark Mode Styles */
+[data-theme="dark"] {
+  --bg-primary: #0b1216;
+  --bg-secondary: #202c33;
+  --bg-card: #202c33;
+  --text-primary: #ffffff;
+  --text-secondary: #8696a0;
+  --border-color: #2a3942;
+  --accent-color: #00a844;
+}
+
+html {
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  background: var(--bg-primary) !important;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar {
+  display: none !important;
+  width: 0px !important;
+  height: 0px !important;
+}
+
+body {
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  background: var(--bg-primary) !important;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+body::-webkit-scrollbar {
+  display: none !important;
+  width: 0px !important;
+  height: 0px !important;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: var(--bg-primary) !important;
+  background-image: none !important;
+}
+
+#root {
+  height: 100%;
+  overflow: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+#root::-webkit-scrollbar {
+  display: none !important;
+  width: 0px !important;
+  height: 0px !important;
+}
+
+.Joblink {
+  width: 100%;
+  min-height: 100vh;
+  height: 100vh;
+  background: var(--bg-primary);
+  background-image: none !important;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  padding-bottom: 50px;
+  padding-top: max(0px, env(safe-area-inset-top));
+  position: relative;
+  touch-action: pan-y;
+}
+
+.Joblink-header-title {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+  background: var(--bg-primary);
+  box-sizing: border-box;
+  padding-top: max(0px, env(safe-area-inset-top));
+  border-bottom: none;
+}
+
+.Joblink-header-top {
+  margin-top: 26px;
+  padding: clamp(24px, 4vw, 32px) clamp(12px, 4vw, 28px);
+  padding-left: max(clamp(12px, 4vw, 28px), env(safe-area-inset-left));
+  padding-right: max(clamp(12px, 4vw, 28px), env(safe-area-inset-right));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: clamp(8px, 2vw, 16px);
+  flex-wrap: nowrap;
+  min-height: 55px;
+  width: 100%;
+}
+
+/* Hide profile avatar in header when notifications page is open */
+body.notifications-open .bottom-profile-wrapper {
+  display: none !important;
+}
+
+.Joblink-header-title h1 {
+  font-size: clamp(1rem, 2.5vw, 1.3rem);
+  color: var(--text-primary);
+  margin: 0;
+  flex-shrink: 0;
+  font-weight: 600;
+  padding: 8px 0;
+  letter-spacing: 0.5px;
+  margin-left: 0 !important;
+  margin-right: auto !important;
+  margin-top: -4px !important;
+}
+
+.tab-icon {
+  font-size: 1.3em;
+  margin-right: 0;
+  display: block;
+}
+
+.tab-label {
+  display: block;
+  font-size: 0.75em;
+  line-height: 1.2;
+}
+
+.tabs-container {
+  display: flex;
+  gap: clamp(40px, 12vw, 80px);
+  width: 100%;
+  padding: 0px clamp(12px, 2.5vw, 20px) !important;
+  padding-bottom: max(0px, calc(0px + env(safe-area-inset-bottom))) !important;
+  background: var(--bg-primary) !important;
+  overflow-x: auto;
+  overflow-y: visible;
+  justify-content: flex-start;
+  align-items: center;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  border-top: 0.35px solid rgba(127, 141, 156, 0.04);
+  position: fixed;
+  bottom: 40px !important;
+  left: 0;
+  right: 0;
+  z-index: 999;
+  min-height: auto !important;
+  box-sizing: border-box;
+  box-shadow: none;
+  mix-blend-mode: normal;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+  touch-action: pan-x;
+  overscroll-behavior-x: contain;
+}
+
+.tabs-container::-webkit-scrollbar {
+  display: none;
+  width: 0px;
+  height: 0px;
+}
+
+.tabs-container::before {
+  content: '';
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(40px + env(safe-area-inset-bottom));
+  background: var(--bg-primary);
+  z-index: 998;
+  pointer-events: none;
+}
+
+.tab-button {
+  padding: 10px clamp(16px, 4vw, 24px);
+  font-size: clamp(0.75rem, 1.8vw, 0.95rem) !important;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: transparent;
+  color: var(--text-primary);
+  font-weight: 600;
+  box-shadow: none;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+  min-width: clamp(110px, 25vw, 180px);
+  border-bottom: 2px solid transparent;
+  outline: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  white-space: nowrap;
+  margin-bottom: 4px !important;
+  scroll-snap-align: center;
+  scroll-snap-stop: auto;
+  transform: scale(1);
+  touch-action: pan-x;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.tab-button:hover,
+.tab-button:focus,
+.tab-button:active,
+.tab-button:focus-visible {
+  outline: none;
+  box-shadow: none;
+  background: transparent;
+  color: var(--text-primary);
+}
+
+.tab-button.active {
+  color: #00a844;
+  background: transparent;
+  transform: scale(1.05);
+}
+
+.tab-button.active:hover,
+.tab-button.active:focus,
+.tab-button.active:active,
+.tab-button.active:focus-visible {
+  outline: none;
+  box-shadow: none;
+  color: #00a844;
+  background: transparent;
+}
+
+/* Smooth fade-out for loading spinners/overlays on web; instant hide on mobile */
+.loading-container {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 24px;
+  box-sizing: border-box;
+  min-height: 100dvh;
+  min-height: 100vh;
+  width: 100%;
+  background: #060b14;
+  opacity: 0;
+  visibility: hidden;
+  text-align: center;
+  transition: opacity 300ms ease-out, visibility 300ms ease-out;
+}
+
+.loading-container.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.loading-container p {
+  margin: 0;
+  color: #ffffff;
+  font-size: 14px;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.loading-spinner {
+  width: 56px;
+  height: 56px;
+  border: 4px solid rgba(255, 255, 255, 0.16);
+  border-top-color: #00d4ff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.callback-spinner {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 300ms ease-out, visibility 300ms ease-out;
+}
+
+.callback-spinner.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Disable animations on native mobile to prevent flashing */
+@media (max-width: 768px) {
+  .loading-spinner, .loading-container, .callback-spinner,
+  .login-container {
+    transition: none !important;
+  }
+}
+
+
+.Joblink-content {
+  position: absolute;
+  top: 38px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  flex: 1;
+  width: 100%;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 0px;
+  padding-top: 16px;
+  padding-bottom: calc(80px + env(safe-area-inset-bottom));
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  scrollbar-color: transparent transparent;
+  -ms-overflow-style: none;
+  margin-top: 0;
+  will-change: scroll-position;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  background: var(--bg-primary);
+  /* No transition - instant view switching */
+  opacity: 1;
+}
+
+.Joblink-content::-webkit-scrollbar {
+  display: none;
+  width: 0px;
+  height: 0px;
+}
+
+.Home,
+.Trending,
+.Following {
+  color: #333;
+}
+
+.Home h2,
+.Trending h2,
+.Following h2 {
+  font-size: 2rem;
+  margin-bottom: 15px;
+  color: #007AFF;
+}
+
+.Home p,
+.Trending p,
+.Following p {
+  font-size: 1.1rem;
+  color: #555;
+}
+
+/* RESPONSIVE DESIGN - TABLET SCREENS (768px to 1024px) */
+@media (max-width: 1024px) {
+  .Joblink {
+    padding-bottom: 50px;
+  }
+  .Joblink-content {
+    padding-bottom: 15px !important;
+  }
+  .Joblink-header-title {
+    min-height: 105px;
+    padding-top: 45px;
+  }
+
+  .Joblink-header-top {
+    padding: clamp(14px, 2.8vw, 18px) clamp(16px, 3vw, 24px);
+    gap: clamp(12px, 2vw, 18px);
+    min-height: 50px;
+  }
+
+  .Joblink-header-title h1 {
+    font-size: clamp(1.2rem, 2.5vw, 1.4rem);
+  }
+
+  .tabs-container {
+    padding: 0 clamp(12px, 2.5vw, 16px) !important;
+    gap: clamp(28px, 6vw, 50px);
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tab-button {
+    font-size: clamp(0.75rem, 1.5vw, 0.8rem);
+    min-width: clamp(100px, 22vw, 160px);
+    flex-shrink: 0;
+    padding: 8px clamp(14px, 3vw, 18px);
+  }
+
+  .Joblink-content {
+    padding: 0px;
+    padding-top: 60px;
+    padding-bottom: 30px !important;
+  }
+
+  .Home h2,
+  .Trending h2,
+  .Following h2 {
+    font-size: clamp(1.4rem, 3vw, 1.8rem);
+  }
+
+  .Home p,
+  .Trending p,
+  .Following p {
+    font-size: clamp(0.85rem, 2vw, 1rem);
+  }
+}
+
+/* RESPONSIVE DESIGN - MOBILE SCREENS (480px to 768px) */
+@media (max-width: 768px) {
+  .Joblink {
+    padding-bottom: 0 !important;
+  }
+
+  .Joblink-content {
+    padding-bottom: 30px !important;
+  }
+
+  .Joblink-header-title {
+    min-height: 70px;
+    padding-top: 12px;
+  }
+
+  .Joblink-header-top {
+    padding: clamp(6px, 1.5vw, 10px) clamp(10px, 2.5vw, 16px);
+    gap: clamp(8px, 1.5vw, 12px);
+    min-height: 48px;
+  }
+
+  .Joblink-header-title h1 {
+    font-size: clamp(1.3rem, 4vw, 1.5rem);
+    flex-shrink: 0;
+    font-weight: 600;
+    margin-top: -4px !important;
+  }
+
+  .tabs-container {
+    padding: 0px clamp(10px, 2vw, 14px) !important;
+    gap: clamp(20px, 5vw, 36px);
+    min-height: auto !important;
+    overflow-x: auto;
+    overflow-y: visible;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+  }
+
+  .tab-button {
+    position: relative;
+    z-index: 1000;
+    padding: clamp(7px, 1.5vw, 10px) clamp(12px, 2.5vw, 16px);
+    font-size: clamp(0.65rem, 1.5vw, 0.75rem);
+    min-width: clamp(65px, 18vw, 100px);
+    flex-shrink: 0;
+    scroll-snap-align: center;
+    scroll-snap-stop: auto;
+  }
+
+  /* When back button is visible, hide all other tab buttons on mobile */
+  .back-button-mobile.visible ~ .tab-button {
+    display: none !important;
+  }
+  
+  /* When back button is hidden, show all tab buttons */
+  .back-button-mobile.hidden ~ .tab-button {
+    display: flex !important;
+  }
+
+  .Joblink-content {
+    padding: 0px;
+    padding-top: 50px;
+    padding-bottom: 15px !important;
+  }
+}
+
+/* RESPONSIVE DESIGN - SMALL MOBILE SCREENS (< 480px) */
+@media (max-width: 480px) {
+  .Joblink {
+    padding-bottom: 0 !important;
+  }
+
+  .Joblink-content {
+    padding-bottom: 30px !important;
+  }
+
+  .Joblink-header-title {
+    min-height: 50px;
+    padding-top: 8px;
+  }
+
+  .Joblink-header-top {
+    padding: clamp(6px, 1vw, 10px) clamp(8px, 2vw, 12px);
+    gap: clamp(6px, 1.2vw, 10px);
+    min-height: 44px;
+  }
+
+  .Joblink-header-title h1 {
+    font-size: clamp(1.2rem, 3.5vw, 1.4rem);
+    flex-shrink: 0;
+    font-weight: 600;
+    margin-top: -4px !important;
+  }
+
+  .tabs-container {
+    padding: 0px clamp(8px, 1.5vw, 12px) !important;
+    gap: clamp(18px, 4vw, 32px);
+    min-height: auto !important;
+    overflow-x: auto;
+    overflow-y: visible;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+  }
+
+  .tab-button {
+    padding: clamp(6px, 1.2vw, 8px) clamp(10px, 2vw, 14px);
+    font-size: clamp(0.6rem, 1.2vw, 0.7rem);
+    min-width: clamp(58px, 16vw, 85px);
+    flex-shrink: 0;
+    scroll-snap-align: center;
+    scroll-snap-stop: auto;
+  }
+
+  .Joblink-content {
+    padding: 0px;
+    padding-top: 40px;
+    padding-bottom: 15px !important;
+  }
+  .Trending h2,
+  .Following h2 {
+    font-size: clamp(1rem, 2vw, 1.2rem);
+  }
+
+  .Home p,
+  .Trending p,
+  .Following p {
+    font-size: clamp(0.75rem, 1.5vw, 0.85rem);
+  }
+}
+

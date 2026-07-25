@@ -1,0 +1,13 @@
+.employer-section-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.employer-section-card .form-two-col {
+  margin: 0;
+}
+
+.employer-section-card .form-group {
+  margin-bottom: 0;
+}

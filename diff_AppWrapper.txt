@@ -1,0 +1,277 @@
+diff --git a/src/pages/AppWrapper.jsx b/public/Joblink/src/pages/AppWrapper.jsx
+index fca7787b..38108146 100644
+--- a/src/pages/AppWrapper.jsx
++++ b/public/Joblink/src/pages/AppWrapper.jsx
+@@ -17,6 +17,7 @@ import JobLink from './JobLink';
+ import FollowLikeListPage from '../components/FollowLikeListPage';
+ import MediaDebugPanel from './MediaDebugPanel';
+ import { getFallbackRoute, getLandingEntryRoute, shouldClearStaleAuthFlags, shouldHandleAuthCallback } from '../utils/authRouting';
++import { getPublicAssetUrl } from '../utils/publicAssetUrl';
+ 
+ /**
+  * Protected Route Component
+@@ -27,7 +28,6 @@ function ProtectedRoute({ children }) {
+   const navigate = useNavigate();
+   const location = useLocation();
+   const [hasCheckedAuth, setHasCheckedAuth] = React.useState(false);
+-  const [isCheckingProfile, setIsCheckingProfile] = React.useState(false);
+   const redirectTimeoutRef = React.useRef(null);
+   const [profileChecked, setProfileChecked] = React.useState(false);
+   const profileCheckAbortRef = React.useRef(false);
+@@ -35,7 +35,6 @@ function ProtectedRoute({ children }) {
+   React.useEffect(() => {
+     if (!isAuthenticated) {
+       setProfileChecked(false);
+-      setIsCheckingProfile(false);
+       profileCheckAbortRef.current = false;
+     }
+ 
+@@ -74,13 +73,13 @@ function ProtectedRoute({ children }) {
+       supabase.auth.getSession().then(({ data: { session } }) => {
+         if (!session) {
+           const oauthInProgress = localStorage.getItem('_oauthInProgress') === 'true';
+-          const authCached = localStorage.getItem('_authCached') === 'true';
+ 
+-          if (oauthInProgress || authCached) {
++          if (oauthInProgress) {
+             setHasCheckedAuth(false);
+             return;
+           }
+ 
++          try { localStorage.removeItem('_authCached'); } catch (e) {}
+           setHasCheckedAuth(true);
+           navigate('/login', { replace: true });
+         } else {
+@@ -98,7 +97,7 @@ function ProtectedRoute({ children }) {
+ 
+   if (isLoading && !isSigningOut) {
+     return (
+-      <div className="loading-container">
++      <div className="loading-container visible">
+         <div className="loading-spinner"></div>
+         <p>Loading...</p>
+       </div>
+@@ -110,7 +109,7 @@ function ProtectedRoute({ children }) {
+     if (isSigningOut) return null;
+     // Show loading while waiting for auth context or session to be established
+     return (
+-      <div className="loading-container">
++      <div className="loading-container visible">
+         <div className="loading-spinner"></div>
+       </div>
+     );
+@@ -118,7 +117,7 @@ function ProtectedRoute({ children }) {
+ 
+   if (!profileChecked && location.pathname !== '/account-type-selector') {
+     return (
+-      <div className="loading-container">
++      <div className="loading-container visible">
+         <div className="loading-spinner"></div>
+         <p>Checking profile...</p>
+       </div>
+@@ -136,7 +135,17 @@ function AppRouter() {
+   const { isAuthenticated, isLoading, isSigningOut } = useAuth();
+   const navigate = useNavigate();
+   const location = useLocation();
+-  const authCached = localStorage.getItem('_authCached') === 'true';
++  const [authCached, setAuthCached] = React.useState(() => {
++    if (typeof window === 'undefined') return false;
++    return localStorage.getItem('_authCached') === 'true';
++  });  
++
++  React.useEffect(() => {
++    const currentCached = localStorage.getItem('_authCached') === 'true';
++    if (currentCached !== authCached) {
++      setAuthCached(currentCached);
++    }
++  }, [isAuthenticated, isLoading, authCached]);
+ 
+   // Helper function to check if user has a complete profile and redirect accordingly
+   const checkUserProfile = useCallback(async () => {
+@@ -151,7 +160,7 @@ function AppRouter() {
+       }
+ 
+       // Check if user has a complete profile in the database (profile exists AND user_type is set)
+-      const { data: profile, error } = await supabase
++      const { data: profile } = await supabase
+         .from('profiles')
+         .select('id, user_type')
+         .eq('id', session.user.id)
+@@ -177,18 +186,20 @@ function AppRouter() {
+ 
+   // Auto-redirect based on auth status
+   useEffect(() => {
+-    if (isLoading && !isSigningOut) return;
+-
+-    // Skip redirect logic if we're on auth/callback (let AuthCallback handle it)
+-    if (location.pathname === '/auth/callback') {
++    if (location.pathname === '/auth/callback' || location.pathname === '/account-type-selector') {
+       return;
+     }
+ 
+-    // Skip redirect logic if we're on account selector
+-    if (location.pathname === '/account-type-selector') {
++    if (isLoading && !isSigningOut) {
+       return;
+     }
+ 
++    const clearStaleAuthCache = () => {
++      if (localStorage.getItem('_authCached') === 'true') {
++        try { localStorage.removeItem('_authCached'); } catch (e) {}
++      }
++    };
++
+     // If auth was cached and we're still on login, check profile to redirect correctly
+     if (location.pathname === '/login' && authCached) {
+       checkUserProfile();
+@@ -201,8 +212,9 @@ function AppRouter() {
+       return;
+     }
+ 
+-    // If on root and auth is cached but not yet fully available, keep the loading screen until auth is settled.
+-    if (!isLoading && authCached && location.pathname === '/') {
++    // If we finished loading and no user is authenticated on root, clear stale cache and let the landing page render.
++    if (!isAuthenticated && !isLoading && location.pathname === '/') {
++      clearStaleAuthCache();
+       return;
+     }
+ 
+@@ -224,7 +236,15 @@ function AppRouter() {
+   }, [location.pathname, checkUserProfile]);
+ 
+   useEffect(() => {
+-    if (location.pathname !== '/auth/callback' && shouldHandleAuthCallback({ pathname: location.pathname, hash: window.location.hash, search: window.location.search })) {
++    const shouldHandle = shouldHandleAuthCallback({ pathname: location.pathname, hash: window.location.hash, search: window.location.search });
++    console.log('🔁 AppRouter auth callback check', {
++      pathname: location.pathname,
++      hash: window.location.hash,
++      search: window.location.search,
++      shouldHandle,
++    });
++
++    if (location.pathname !== '/auth/callback' && shouldHandle) {
+       navigate(
+         {
+           pathname: '/auth/callback',
+@@ -249,14 +269,30 @@ function AppRouter() {
+   // This prevents unauthenticated users from seeing /home when they never finished profile creation.
+   const isAppBootWithCachedAuth = authCached && location.pathname === '/' && isAuthenticated && !isSigningOut;
+   const shouldRedirectToHash = hasHashRoute && hashRoute !== '/landing' && !isAppBootWithCachedAuth && !isAuthCallback;
+-  const forceLoadingOnRoot = authCached && location.pathname === '/' && !isAuthenticated;
++  const forceLoadingOnRoot = authCached && location.pathname === '/' && !isAuthenticated && isLoading;
+ 
+   // If authenticated at root, show loading while we check profile (don't use stale localStorage)
+   const isCheckingProfile = isAuthenticated && location.pathname === '/' && !isSigningOut;
+-  const shouldShowRootLoading = location.pathname === '/' && (authCached || isAuthenticated) && !isSigningOut;
++  const shouldShowRootLoading = location.pathname === '/' && ((authCached && isLoading) || isAuthenticated) && !isSigningOut;
++
++  console.log('🧭 AppRouter render state', {
++    pathname: location.pathname,
++    hashRoute,
++    hasHashRoute,
++    isAuthCallback,
++    authCached,
++    isAuthenticated,
++    isLoading,
++    isSigningOut,
++    isAppBootWithCachedAuth,
++    shouldRedirectToHash,
++    forceLoadingOnRoot,
++    isCheckingProfile,
++    shouldShowRootLoading,
++  });
+ 
+   const rootElement = shouldShowRootLoading && (isLoading || forceLoadingOnRoot || isCheckingProfile) ? (
+-    <div className="loading-container">
++    <div className="loading-container visible">
+       <div className="loading-spinner"></div>
+       <p>Loading...</p>
+     </div>
+@@ -268,6 +304,10 @@ function AppRouter() {
+     <Landing onGetStarted={handleLandingGetStarted} />
+   );
+ 
++  console.log('🧭 AppRouter result', {
++    renderType: isAuthCallback ? 'authCallback' : shouldRedirectToHash ? 'hashRedirect' : shouldShowRootLoading ? 'rootLoading' : 'landing',
++  });
++
+   return (
+     <Routes>
+       {/* Public Routes */}
+@@ -343,15 +383,35 @@ function AppRouter() {
+  */
+ export default function AppWrapper() {
+   const navigate = useNavigate();
+-  const isInitialOauthFlow = typeof window !== 'undefined' && (
+-    localStorage.getItem('_oauthInProgress') === 'true' ||
+-    window.location.pathname.includes('/auth/callback') ||
+-    window.location.href.includes('/auth/callback')
+-  );
+-
+-  const [globalOauth, setGlobalOauth] = React.useState(isInitialOauthFlow);
+-  const [delayedVisible, setDelayedVisible] = React.useState(isInitialOauthFlow);
++  const initialRouteIsCallback = typeof window !== 'undefined' && shouldHandleAuthCallback({
++    pathname: window.location.pathname,
++    hash: window.location.hash,
++    search: window.location.search,
++  });
++
++  const [globalOauth, setGlobalOauth] = React.useState(initialRouteIsCallback);
++  const [authCached] = React.useState(() => {
++    if (typeof window === 'undefined') return false;
++    return localStorage.getItem('_authCached') === 'true';
++  });
++  const [delayedVisible, setDelayedVisible] = React.useState(initialRouteIsCallback);
+   const delayedTimerRef = React.useRef(null);
++
++  React.useEffect(() => {
++    const oauthInProgress = typeof window !== 'undefined' && localStorage.getItem('_oauthInProgress') === 'true';
++    console.log('🔍 AppWrapper init', {
++      pathname: typeof window !== 'undefined' ? window.location.pathname : null,
++      hash: typeof window !== 'undefined' ? window.location.hash : null,
++      search: typeof window !== 'undefined' ? window.location.search : null,
++      initialRouteIsCallback,
++      oauthInProgress,
++      authCached,
++      globalOauth,
++      delayedVisible,
++    });
++    // Intentionally include the derived state values above to satisfy eslint hooks rules.
++    // These values are stable for the lifecycle we care about and safe to include here.
++  }, [authCached, delayedVisible, globalOauth, initialRouteIsCallback]);
+   const nativeOauthPickerActiveRef = React.useRef(false);
+ 
+   // On app startup, clear stale oauth/auth flags if there's no active session
+@@ -364,6 +424,14 @@ export default function AppWrapper() {
+         const { data: { session } } = await supabase.auth.getSession();
+         if (!isActive) return;
+ 
++        console.log('🔎 AppWrapper startup auth check', {
++          hasSession: Boolean(session),
++          oauthInProgress,
++          authCached,
++          sessionUser: session?.user?.email || session?.user?.id || null,
++          currentPath: window.location.pathname,
++        });
++
+         if (shouldClearStaleAuthFlags({ hasSession: Boolean(session), oauthInProgress, authCached })) {
+           try { localStorage.removeItem('_oauthInProgress'); } catch (e) {}
+           try { localStorage.removeItem('_authCached'); } catch (e) {}
+@@ -371,6 +439,8 @@ export default function AppWrapper() {
+           setDelayedVisible(false);
+           try { window.dispatchEvent(new CustomEvent('oauthCompleted')); } catch(e) {}
+           console.log('ℹ️ Cleared stale oauth/auth flags on startup');
++        } else {
++          console.log('ℹ️ No stale auth flags to clear on startup');
+         }
+       } catch (err) {
+         console.warn('Error checking session on startup:', err);
+@@ -719,7 +789,7 @@ export default function AppWrapper() {
+           padding: 24,
+         }}>
+           <img
+-            src="/LinkWhite.png"
++            src={getPublicAssetUrl('/LinkWhite.png')}
+             alt="Joblink logo"
+             style={{
+               width: 40,

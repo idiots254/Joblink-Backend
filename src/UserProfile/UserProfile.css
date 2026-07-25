@@ -1,0 +1,472 @@
+/* User Profile Menu - Professional and Clean Design */
+
+:root {
+  --primary: #00a884;
+  --primary-hover: #008069;
+  --bg-card: var(--bg-secondary);
+  --bg-dark: var(--bg-primary);
+  --text: var(--text-primary);
+  --text-light: var(--text-secondary);
+  --shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  --transition: all 0.25s ease;
+}
+
+.user-profile-menu-up {
+  position: absolute;
+  bottom: auto;
+  right: 40px;
+  left: auto;
+  top: 16px;
+  margin-top: 0;
+  background: #d0d0d0;
+  border-radius: 10px;
+  box-shadow: none;
+  width: 223px !important;
+  min-width: 296px !important;
+  max-width: calc(100vw - 16px) !important;
+  box-sizing: border-box;
+  border: 1px solid var(--border-color);
+  z-index: 2001;
+  animation: slideDown-up 0.25s ease;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  padding: 0 0 4px !important;
+  max-height: calc(100vh - 180px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes slideDown-up {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.user-profile-header-up {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 6px !important;
+  padding: 6px 8px 16px 6px !important;
+  background: #d0d0d0 !important;
+  border-bottom: 0.5px solid #888888 !important;
+  align-items: center !important;
+}
+
+.user-avatar-up {
+  width: 64px !important;
+  height: 64px !important;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  flex-shrink: 0;
+  transition: none !important;
+  cursor: pointer;
+  margin-top: -4px;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+.user-avatar-up:hover,
+.user-avatar-image-up:hover,
+.user-avatar-placeholder-up:hover,
+.user-avatar-up:active,
+.user-avatar-image-up:active,
+.user-avatar-placeholder-up:active {
+  transform: none !important;
+  filter: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.user-avatar-placeholder-up {
+  border-radius: 50%;
+  width: 64px !important;
+  height: 64px !important;
+  min-width: 64px !important;
+  min-height: 64px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 1.4rem;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+  box-shadow: none;
+  transition: none !important;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
+  outline: none !important;
+}
+
+.avatar-initials-up {
+  position: relative;
+  z-index: 1;
+  letter-spacing: -1px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.user-avatar-container-up:hover .user-avatar-placeholder-up {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.user-avatar-image-up {
+  border-radius: 50% !important;
+  width: 64px !important;
+  height: 64px !important;
+  min-width: 64px !important;
+  min-height: 64px !important;
+  object-fit: cover !important;
+  display: block !important;
+  flex-shrink: 0 !important;
+  transition: none !important;
+  box-shadow: none !important;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
+  outline: none !important;
+}
+
+.user-avatar-container-up:hover .user-avatar-image-up {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.user-info-up {
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  gap: 2px !important;
+  min-width: 150px !important;
+  width: auto !important;
+  margin-left: 0 !important;
+}
+
+.user-stats-up {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 2px;
+  padding-top: 2px;
+  border-top: 1px solid rgba(0, 0, 0, 0.10);
+}
+
+.user-stat-up {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 11px;
+  color: var(--text-light);
+}
+
+.user-stat-button-up {
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+}
+
+.user-stat-button-up:hover,
+.user-stat-button-up:focus-visible {
+  text-decoration: underline;
+}
+
+.user-stat-divider-up {
+  padding-left: 10px;
+  margin-left: 10px;
+  border-left: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+@media (max-width: 520px) {
+  .user-stats-up {
+    gap: 6px;
+  }
+
+  .user-stat-up {
+    gap: 10px;
+    font-size: 10px;
+  }
+
+  .user-stat-divider-up {
+    padding-left: 8px;
+    margin-left: 8px;
+  }
+}
+
+.user-stat-icon-up {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  font-size: 14px;
+}
+
+.user-stat-label-up {
+  font-size: 11px;
+  color: var(--text-light);
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.user-stat-value-up {
+  font-weight: 700;
+  color: var(--text);
+}
+
+.user-name-up {
+  margin: 0 !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  color: var(--text) !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  white-space: normal !important;
+  line-height: 1.2 !important;
+  display: block !important;
+}
+
+.user-email-up {
+  margin: 0 !important;
+  font-size: 13px !important;
+  color: var(--text-light) !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  white-space: normal !important;
+  line-height: 1.1 !important;
+  display: block !important;
+  max-width: calc(100% - 16px) !important;
+}
+
+.profile-action-buttons-up {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 8px 6px 8px;
+  margin-top: 0px;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Force stronger override in case compiled CSS provides stronger selectors */
+.userp-wrapper .user-profile-menu-up,
+.user-profile-menu-up {
+  max-height: calc(100vh - 180px) !important;
+  padding-bottom: 4px !important;
+}
+
+.action-btn-up {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 10px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: 11px;
+  color: var(--text);
+  text-align: center;
+  border-radius: 6px;
+  font-weight: 500;
+  font-family: inherit;
+  min-height: auto;
+  white-space: nowrap;
+  word-break: keep-all;
+}
+
+.action-btn-up:hover {
+  color: var(--primary);
+}
+
+/* Profile header icon - theme-specific brightness */
+.profile-header-icon {
+  fill: #555555;
+}
+
+[data-theme="dark"] .profile-header-icon {
+  fill: #999999;
+}
+
+.action-btn-up:active {
+  opacity: 0.8;
+}
+
+.upgrade-btn-up {
+  flex-direction: column;
+  gap: 1px;
+}
+
+.btn-icon-up {
+  font-size: 12px;
+  display: none;
+  flex-shrink: 0;
+}
+
+.btn-label-up {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+.upgrade-badge-up {
+  font-size: 7px;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-top: 1px;
+}
+
+/* Scrollbar styling */
+.user-profile-menu-up::-webkit-scrollbar {
+  width: 6px;
+}
+
+.user-profile-menu-up::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.user-profile-menu-up::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+.user-profile-menu-up::-webkit-scrollbar-thumb:hover {
+  background: var(--text-light);
+}
+
+/* Dark Mode Support */
+[data-theme="dark"] .user-profile-menu-up {
+  background: var(--bg-secondary);
+}
+
+[data-theme="dark"] .user-profile-header-up {
+  background: var(--bg-secondary) !important;
+  border-bottom: 0.5px solid rgba(0, 168, 68, 0.15) !important;
+}
+
+/* Mobile Responsive - 30% Reduction */
+@media (max-width: 768px) {
+  .user-profile-menu-up {
+    min-width: 224px;
+    max-width: 95vw;
+    border-radius: 7px;
+    border: none;
+    padding-bottom: 4px;
+    right: 40px;
+    left: auto;
+    top: 12px;
+    margin-top: 0px;
+  }
+
+  .user-profile-header-up {
+    display: flex !important;
+    flex-direction: row !important;
+    padding: 4px 8px 14px 8px !important;
+    gap: 8px !important;
+    min-height: auto !important;
+    align-items: flex-start !important;
+  }
+
+  .user-profile-menu-up .user-avatar-up,
+  .user-profile-menu-up .user-avatar-image-up,
+  .user-profile-menu-up .user-avatar-placeholder-up {
+    width: 56px !important;
+    height: 56px !important;
+    min-width: 56px !important;
+    min-height: 56px !important;
+    margin-top: -2px;
+  }
+
+  .user-profile-menu-up .user-avatar-placeholder-up {
+    font-size: 1.6rem !important;
+  }
+
+  .user-info-up {
+    margin-left: 16px !important;
+    margin-top: 0px !important;
+  }
+
+  .user-name-up {
+    font-size: 13px;
+  }
+
+  .user-email-up {
+    font-size: 11px;
+    margin: 0px 0 0 0;
+  }
+
+  .profile-action-buttons-up {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 10px 8px 10px;
+    margin-top: 2px;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .profile-action-buttons-up::-webkit-scrollbar {
+    display: none;
+  }
+
+  .action-btn-up {
+    flex: 0 0 auto !important;
+    min-width: 56px !important;
+    padding: 8px 8px !important;
+    gap: 6px !important;
+    font-size: 11px !important;
+    border-radius: 4px !important;
+    min-height: auto;
+    flex-direction: row;
+    white-space: nowrap;
+    background: transparent !important;
+    border: none !important;
+  }
+
+  .btn-icon-up {
+    font-size: 11px;
+    display: none;
+  }
+
+  .btn-label-up {
+    font-size: 11px;
+  }
+
+  .upgrade-badge-up {
+    font-size: 5px;
+  }
+
+  .upgrade-btn-up {
+    gap: 1px;
+  }
+}

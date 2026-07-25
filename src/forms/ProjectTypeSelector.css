@@ -1,0 +1,319 @@
+.proj-sel-wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Selected Project Type Display - Top */
+.proj-sel-label-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  margin-bottom: 0;
+  row-gap: 0;
+  padding: 4px 0;
+}
+
+.proj-sel-label-text {
+  color: #000000;
+  font-weight: 600;
+  font-size: 11px;
+  flex-shrink: 0;
+  white-space: nowrap;
+  letter-spacing: 0.5px;
+}
+
+[data-theme="dark"] .proj-sel-label-text {
+  color: #a0aab8 !important;
+}
+
+.proj-sel-badge {
+  display: inline;
+  color: #00d9ff;
+  font-size: 13px;
+  font-weight: 500;
+  flex: 1;
+  word-break: break-word;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+/* Input Row - select only */
+.proj-sel-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+/* Select Wrapper */
+.proj-sel-select-wrapper {
+  flex: 1;
+  position: relative;
+}
+
+.proj-sel-select-wrapper::after {
+  content: '';
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid var(--text-primary);
+  pointer-events: none;
+}
+
+/* Select Dropdown */
+.proj-sel-select {
+  width: 100%;
+  padding: 8px 32px 8px 10px;
+  background: transparent !important;
+  border: 0.8px solid #6a6a6a !important;
+  border-radius: 6px !important;
+  color: var(--text-primary) !important;
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.proj-sel-select::-webkit-scrollbar {
+  display: none;
+}
+
+.proj-sel-select:hover {
+  background: var(--bg-card);
+  border-color: #059669;
+}
+
+/* Green border for filled select */
+.proj-sel-select.is-filled,
+.proj-sel-mobile-picker-btn.is-filled {
+  border-color: #059669 !important;
+  background: rgba(16, 185, 129, 0.08) !important;
+}
+
+[data-theme="dark"] .proj-sel-select {
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .proj-sel-select:hover:not(:disabled) {
+  border-color: #1f4570 !important;
+}
+
+[data-theme="dark"] .proj-sel-select:focus {
+  border-color: #1f4570 !important;
+}
+
+[data-theme="dark"] .proj-sel-select.is-filled,
+[data-theme="dark"] .proj-sel-mobile-picker-btn.is-filled {
+  border-color: #1f4570 !important;
+  background: rgba(86, 200, 255, 0.08) !important;
+}
+
+/* Blue focus only on empty select */
+.proj-sel-select:focus:not(.is-filled),
+.proj-sel-mobile-picker-btn:focus:not(.is-filled) {
+  outline: none;
+  background: var(--bg-card) !important;
+  border: 1.5px solid #059669 !important;
+  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2) !important;
+}
+
+/* Keep green on focus for filled select */
+.proj-sel-select.is-filled:focus,
+.proj-sel-mobile-picker-btn.is-filled:focus {
+  outline: none;
+  background: var(--bg-card) !important;
+  border: 1.5px solid #059669 !important;
+  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2) !important;
+}
+
+/* Green border for filled select */
+.proj-sel-select:not([value=""]),
+.proj-sel-select[value]:not([value=""]) {
+  border-color: #10b981 !important;
+}
+
+.proj-sel-select option {
+  background: #1a1f2e;
+  color: #ffffff;
+  padding: 8px;
+}
+
+/* Mobile Picker Button */
+.proj-sel-mobile-picker-btn {
+  width: 100%;
+  padding: 8px 32px 8px 10px;
+  background: transparent;
+  border: 0.8px solid #6a6a6a !important;
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+  display: block;
+  min-height: 36px;
+  position: relative;
+}
+
+.proj-sel-mobile-picker-btn::after {
+  content: '';
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid #a0a8b8;
+  pointer-events: none;
+}
+
+.proj-sel-mobile-picker-btn:hover:not(:disabled) {
+  background: var(--bg-card);
+  border-color: #10b981;
+}
+
+[data-theme="dark"] .proj-sel-mobile-picker-btn {
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .proj-sel-mobile-picker-btn:hover:not(:disabled) {
+  border-color: #1f4570 !important;
+}
+
+[data-theme="dark"] .proj-sel-mobile-picker-btn:focus {
+  border-color: #1f4570 !important;
+}
+
+/* Mobile Modal Overlay */
+.proj-sel-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Mobile Modal Panel (Bottom Sheet) */
+.proj-sel-modal-panel {
+  background: #1a1f2e;
+  border-radius: 12px 12px 0 0;
+  display: flex;
+  flex-direction: column;
+  max-height: 80vh;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* Modal Header */
+.proj-sel-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: rgba(0, 0, 0, 0.15);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  flex-shrink: 0;
+  gap: 12px;
+}
+
+.proj-sel-modal-header h3 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.proj-sel-modal-close {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #6a7280;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.proj-sel-modal-close:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+/* Modal Content (Options List) */
+.proj-sel-modal-content {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  padding-bottom: 48px;
+}
+
+/* Modal Option Button */
+.proj-sel-modal-option {
+  padding: 14px 16px;
+  border: none;
+  background: transparent;
+  color: #ffffff;
+  font-size: 14px;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+.proj-sel-modal-option:hover {
+  background: rgba(86, 200, 255, 0.1);
+}
+
+.proj-sel-modal-option:active {
+  background: rgba(86, 200, 255, 0.15);
+}
+
+.proj-sel-modal-option:last-child {
+  border-bottom: none;
+}

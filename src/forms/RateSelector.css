@@ -1,0 +1,395 @@
+.rate-sel-wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* Selected Rate Display - Top */
+.rate-sel-label-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  margin-bottom: 0;
+  row-gap: 0;
+  padding: 4px 0;
+}
+
+.rate-sel-label-text {
+  color: #000000;
+  font-weight: 600;
+  font-size: 11px;
+  flex-shrink: 0;
+  white-space: nowrap;
+  letter-spacing: 0.5px;
+}
+
+[data-theme="dark"] .rate-sel-label-text {
+  color: #a0aab8 !important;
+}
+
+.rate-sel-badge {
+  display: inline;
+  color: #00d9ff;
+  font-size: 13px;
+  font-weight: 500;
+  flex: 1;
+  word-break: break-word;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+/* Input Row */
+.rate-sel-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+/* Select Wrapper */
+.rate-sel-select-wrapper {
+  flex: 0.5;
+  position: relative;
+}
+
+.rate-sel-select-wrapper::after {
+  content: '';
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid var(--text-primary);
+  pointer-events: none;
+}
+
+/* Select Dropdown */
+.rate-sel-select {
+  width: 100%;
+  padding: 8px 32px 8px 10px;
+  background: transparent !important;
+  border: 0.8px solid #6a6a6a !important;
+  border-radius: 6px !important;
+  color: var(--text-primary) !important;
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.rate-sel-select::-webkit-scrollbar {
+  display: none;
+}
+
+.rate-sel-select:hover {
+  background: var(--bg-card);
+  border-color: #059669;
+}
+
+/* Green border for filled select */
+.rate-sel-select.is-filled,
+.rate-sel-mobile-picker-btn.is-filled {
+  border-color: #059669 !important;
+  background: rgba(16, 185, 129, 0.08) !important;
+}
+
+/* Green focus only on empty select */
+.rate-sel-select:focus:not(.is-filled),
+.rate-sel-mobile-picker-btn:focus:not(.is-filled) {
+  outline: none;
+  background: var(--bg-card) !important;
+  border: 1.5px solid #059669 !important;
+  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2) !important;
+}
+
+/* Keep green on focus for filled select */
+.rate-sel-select.is-filled:focus,
+.rate-sel-mobile-picker-btn.is-filled:focus {
+  outline: none;
+  background: var(--bg-card) !important;
+  border: 1.5px solid #059669 !important;
+  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2) !important;
+}
+
+[data-theme="dark"] .rate-sel-select {
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .rate-sel-select:hover:not(:disabled) {
+  border-color: #1f4570 !important;
+}
+
+[data-theme="dark"] .rate-sel-select:focus {
+  border-color: #1f4570 !important;
+}
+
+[data-theme="dark"] .rate-sel-select.is-filled,
+[data-theme="dark"] .rate-sel-mobile-picker-btn.is-filled {
+  border-color: #1f4570 !important;
+  background: rgba(86, 200, 255, 0.08) !important;
+}
+
+.rate-sel-select option {
+  background: #1a1f2e;
+  color: #ffffff;
+  padding: 8px;
+}
+
+/* Input Wrapper - Currency and Amount */
+.rate-sel-input-wrapper {
+  flex: 0.5;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.rate-sel-currency-prefix {
+  color: #00d9ff;
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.rate-sel-input {
+  flex: 1;
+  padding: 8px 10px;
+  background: transparent;
+  border: 0.8px solid #6a6a6a !important;
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+[data-theme="dark"] .rate-sel-input {
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .rate-sel-input:focus {
+  border-color: #1f4570 !important;
+}
+
+[data-theme="dark"] .rate-sel-input.is-filled,
+[data-theme="dark"] .form-group .rate-sel-input.field-filled {
+  border-color: #1f4570 !important;
+  background: rgba(86, 200, 255, 0.08) !important;
+  box-shadow: none !important;
+}
+
+[data-theme="dark"] .rate-sel-input:hover {
+  border-color: #1f4570 !important;
+}
+
+.rate-sel-input::placeholder {
+  color: var(--text-secondary);
+}
+
+.rate-sel-input:hover {
+  background: var(--bg-card);
+  border-color: #10b981;
+}
+
+.rate-sel-input.is-filled,
+.form-group .rate-sel-input.field-filled {
+  border-color: #059669 !important;
+  background: rgba(16, 185, 129, 0.15) !important;
+  box-shadow: none !important;
+}
+
+.form-group .rate-sel-input.field-filled:focus {
+  border: 1px solid #059669 !important;
+  box-shadow: none !important;
+}
+
+.rate-sel-input:focus {
+  outline: none;
+  background: var(--bg-card);
+  border-color: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+.rate-sel-suffix {
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 500;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* Mobile Picker Button */
+.rate-sel-mobile-picker-btn {
+  width: 100%;
+  padding: 8px 32px 8px 10px;
+  background: transparent;
+  border: 0.8px solid #6a6a6a !important;
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+  display: block;
+  min-height: 36px;
+  position: relative;
+}
+
+.rate-sel-mobile-picker-btn::after {
+  content: '';
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid var(--text-primary);
+  pointer-events: none;
+}
+
+.rate-sel-mobile-picker-btn:hover:not(:disabled) {
+  background: var(--bg-card);
+  border-color: #10b981;
+}
+
+[data-theme="dark"] .rate-sel-mobile-picker-btn {
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .rate-sel-mobile-picker-btn:hover:not(:disabled) {
+  border-color: #1f4570 !important;
+}
+
+[data-theme="dark"] .rate-sel-mobile-picker-btn:focus {
+  border-color: #1f4570 !important;
+}
+
+/* Mobile Modal Overlay */
+.rate-sel-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  z-index: 1000;
+  animation: rate-fadeIn 0.3s ease;
+}
+
+@keyframes rate-fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Mobile Modal Panel (Bottom Sheet) */
+.rate-sel-modal-panel {
+  background: #1a1f2e;
+  border-radius: 12px 12px 0 0;
+  display: flex;
+  flex-direction: column;
+  max-height: 80vh;
+  animation: rate-slideUp 0.3s ease;
+}
+
+@keyframes rate-slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* Modal Header */
+.rate-sel-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: rgba(0, 0, 0, 0.15);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  flex-shrink: 0;
+  gap: 12px;
+}
+
+.rate-sel-modal-header h3 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.rate-sel-modal-close {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.rate-sel-modal-close:hover {
+  color: var(--text-primary);
+  background: rgba(86, 200, 255, 0.15);
+  border-radius: 4px;
+}
+
+/* Modal Content (Options List) */
+.rate-sel-modal-content {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  padding-bottom: 48px;
+}
+
+/* Modal Option Button */
+.rate-sel-modal-option {
+  padding: 14px 16px;
+  border: none;
+  background: transparent;
+  color: #ffffff;
+  font-size: 14px;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+.rate-sel-modal-option:hover {
+  background: rgba(86, 200, 255, 0.1);
+}
+
+.rate-sel-modal-option:active {
+  background: rgba(86, 200, 255, 0.15);
+}
+
+.rate-sel-modal-option:last-child {
+  border-bottom: none;
+}
+

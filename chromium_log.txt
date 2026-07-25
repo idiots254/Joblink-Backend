@@ -1,0 +1,25 @@
+﻿--------- beginning of main
+07-19 22:05:49.900 10160 10160 I chromium: [INFO:components/enterprise/browser/controller/chrome_browser_cloud_management_controller.cc:324] Deferring CBCM Controller Initialization until it is unblocked.
+07-19 22:05:50.112 10224 10241 W chromium: [WARNING:content/app/android/content_main_android.cc:82] android_setCpu already initialized
+07-19 22:05:50.126 10160 10160 W chromium: [WARNING:components/gcm_driver/instance_id/instance_id_android.cc:98] Non-zero TTL requested for InstanceID token, while TTLs are not supported by Android Firebase IID API.
+07-19 22:06:52.274 10278 10278 I chromium: [INFO:components/enterprise/browser/controller/chrome_browser_cloud_management_controller.cc:324] Deferring CBCM Controller Initialization until it is unblocked.
+07-19 22:06:52.377 10278 10278 W chromium: [WARNING:components/gcm_driver/instance_id/instance_id_android.cc:98] Non-zero TTL requested for InstanceID token, while TTLs are not supported by Android Firebase IID API.
+07-19 22:06:52.405 10278 10278 W chromium: [WARNING:components/gcm_driver/instance_id/instance_id_android.cc:98] Non-zero TTL requested for InstanceID token, while TTLs are not supported by Android Firebase IID API.
+07-19 22:06:52.405 10278 10278 W chromium: [WARNING:components/gcm_driver/instance_id/instance_id_android.cc:98] Non-zero TTL requested for InstanceID token, while TTLs are not supported by Android Firebase IID API.
+07-19 22:06:52.500 10323 10345 W chromium: [WARNING:content/app/android/content_main_android.cc:82] android_setCpu already initialized
+07-19 22:06:52.673 10323 10345 I chromium: [INFO:third_party/skia/src/gpu/vk/VulkanPreferredFeatures.cpp:434] WARNING: VulkanPreferredFeatures::addFeaturesToQuery() was not called
+07-19 22:06:52.673 10323 10345 I chromium: 
+07-19 22:06:52.674 10323 10345 I chromium: [INFO:third_party/skia/src/gpu/vk/VulkanPreferredFeatures.cpp:437] WARNING: VulkanPreferredFeatures::addFeaturesToEnable() was not called
+07-19 22:06:52.674 10323 10345 I chromium: 
+07-19 22:06:53.169 10278 10315 W chromium: [WARNING:net/cert/ev_root_ca_metadata.cc:118] Not implemented
+07-19 22:06:53.181 10278 10316 W chromium: [WARNING:net/cert/ev_root_ca_metadata.cc:118] Not implemented
+07-19 22:06:53.342 10412 10427 W chromium: [WARNING:content/app/android/content_main_android.cc:82] android_setCpu already initialized
+07-19 22:06:58.632 10573 10573 I chromium: [INFO:components/enterprise/browser/controller/chrome_browser_cloud_management_controller.cc:324] Deferring CBCM Controller Initialization until it is unblocked.
+07-19 22:06:58.747 10573 10573 W chromium: [WARNING:components/gcm_driver/instance_id/instance_id_android.cc:98] Non-zero TTL requested for InstanceID token, while TTLs are not supported by Android Firebase IID API.
+07-19 22:06:58.775 10573 10573 W chromium: [WARNING:components/gcm_driver/instance_id/instance_id_android.cc:98] Non-zero TTL requested for InstanceID token, while TTLs are not supported by Android Firebase IID API.
+07-19 22:06:58.777 10573 10573 W chromium: [WARNING:components/gcm_driver/instance_id/instance_id_android.cc:98] Non-zero TTL requested for InstanceID token, while TTLs are not supported by Android Firebase IID API.
+07-19 22:06:58.958 10617 10638 W chromium: [WARNING:content/app/android/content_main_android.cc:82] android_setCpu already initialized
+07-19 22:06:59.106 10617 10638 I chromium: [INFO:third_party/skia/src/gpu/vk/VulkanPreferredFeatures.cpp:434] WARNING: VulkanPreferredFeatures::addFeaturesToQuery() was not called
+07-19 22:06:59.106 10617 10638 I chromium: 
+07-19 22:06:59.107 10617 10638 I chromium: [INFO:third_party/skia/src/gpu/vk/VulkanPreferredFeatures.cpp:437] WARNING: VulkanPreferredFeatures::addFeaturesToEnable() was not called
+07-19 22:06:59.107 10617 10638 I chromium: 

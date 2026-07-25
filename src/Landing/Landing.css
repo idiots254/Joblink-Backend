@@ -1,0 +1,550 @@
+/* Professional Full-Screen Landing Page with Sliding Sections */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  overflow: hidden;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+}
+
+.landing-page {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  color: #a0aec0;
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+  overflow: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: 0;
+  padding: 0;
+  z-index: 1;
+  pointer-events: auto;
+  transform: none !important;
+  will-change: auto;
+  background: #0b1216;
+}
+
+/* Dark background - use white text */
+.landing-page.dark-bg .hero-main-title,
+.landing-page.dark-bg .highlight-value {
+  color: #ffffff;
+}
+
+.landing-page.dark-bg .highlight-check {
+  color: #10b981;
+  filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.8));
+}
+
+/* Light background - use dark text */
+.landing-page.light-bg .hero-main-title,
+.landing-page.light-bg .highlight-value {
+  color: #000000;
+}
+
+.landing-page.light-bg .highlight-check {
+  color: #000000;
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.8));
+}
+
+/* ============ Sticky Header ============ */
+.sticky-header {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 9999 !important;
+  background: transparent;
+  backdrop-filter: blur(0px);
+  border-bottom: none;
+  padding: 0;
+  min-height: auto;
+  margin-bottom: -20px;
+  pointer-events: none;
+  transform: none !important;
+  will-change: auto;
+  width: 100vw !important;
+}
+
+.sticky-header::after {
+  content: '';
+  position: absolute;
+  bottom: 40px;
+  left: 0;
+  right: 0;
+  height: 0.1px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.header-container {
+  max-width: 100%;
+  margin: 0;
+  padding: 5px clamp(15px, 3vw, 30px) 0 clamp(15px, 3vw, 30px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 48px;
+  pointer-events: auto;
+}
+
+.logo-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 24px;
+  font-weight: 700;
+  color: #ffffff;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.logo-text {
+  background: linear-gradient(135deg, #6366f1 0%, #22c55e 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.logo-text-simple {
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 24px;
+}
+
+.header-nav {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.nav-indicator {
+  font-size: 14px;
+  color: #6366f1;
+  font-weight: 600;
+}
+
+.header-actions {
+  display: flex !important;
+  gap: 12px;
+  align-items: center;
+  position: absolute;
+  right: -150px !important;
+  margin-left: 5px;
+  pointer-events: auto;
+}
+
+.btn-header {
+  padding: clamp(6px, 1vw, 8px) clamp(14px, 2vw, 18px);
+  background: transparent;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  letter-spacing: 2.5px;
+  pointer-events: auto;
+}
+
+.btn-header:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.btn-header.skip-btn {
+  opacity: 0.7;
+  border: 0.3px solid rgba(255, 255, 255, 0.15);
+}
+
+.btn-header.skip-btn:hover {
+  opacity: 1;
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+/* ============ Sections Wrapper ============ */
+.sections-wrapper {
+  user-select: none;
+  cursor: grab;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: auto;
+  z-index: 10;
+}
+
+.sections-wrapper:active {
+  cursor: grabbing;
+}
+
+.landing-section {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.8s ease;
+  overflow: visible;
+  opacity: 0;
+  will-change: transform;
+}
+
+/* Section Backgrounds */
+.hero-section {
+  background: transparent !important;
+}
+
+.features-section {
+  background: transparent;
+  transform-style: flat;
+}
+
+.how-section {
+  background: transparent;
+}
+
+.testimonials-section {
+  background: transparent;
+}
+
+.stats-section {
+  background: var(--bg-primary);
+}
+
+.cta-section {
+  background: var(--bg-primary);
+}
+
+.hero-section::before {
+  display: none !important;
+}
+
+/* ============ Section Content ============ */
+.section-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1400px;
+  padding: 0 50px 40px 10%;
+  gap: 50px;
+  height: auto;
+  max-height: calc(100vh - 140px);
+  margin: 0 auto 0 0;
+  margin-left: 0;
+  margin-bottom: 0;
+  overflow: hidden;
+}
+
+.hero-section .section-content {
+  justify-content: center;
+  padding: 0;
+  margin: 0;
+  margin-bottom: 0;
+}
+
+/* ============ Navigation ============ */
+.section-indicators {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  display: flex;
+  gap: 16px;
+}
+
+.indicator-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(0, 217, 255, 0.85);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.indicator-dot.active {
+  background: #00d9ff;
+  width: 16px;
+  border-radius: 6px;
+}
+
+.indicator-dot:hover {
+  background: rgba(0, 217, 255, 1);
+}
+
+.nav-arrow {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 100;
+  width: 50px;
+  height: 50px;
+  background: rgba(99, 102, 241, 0.2);
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  border-radius: 50%;
+  color: #ffffff;
+  font-size: 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.nav-arrow:hover {
+  background: rgba(99, 102, 241, 0.4);
+  border-color: #6366f1;
+}
+
+.nav-arrow.prev {
+  left: 30px;
+}
+
+.nav-arrow.next {
+  right: 30px;
+}
+
+/* ============ Swipe Indicator ============ */
+.swipe-indicator {
+  position: fixed;
+  bottom: 64px;
+  left: calc(50% - 92px);
+  transform: none;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  gap: 0px;
+  height: auto;
+  line-height: 1;
+  transition: opacity 0.6s ease;
+  opacity: 1;
+}
+
+.swipe-indicator.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.swipe-text {
+  font-size: 16px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #a855f7 0%, #6366f1 50%, #00d9ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  opacity: 0.8;
+  line-height: 1;
+  margin: 0;
+  padding: 0;
+  height: 16px;
+  display: flex;
+  align-items: center;
+}
+
+.swipe-arrow-right {
+  font-size: 48px;
+  font-weight: 900;
+  background: linear-gradient(135deg, #a855f7 0%, #6366f1 50%, #00d9ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: arrowStretchRight 2.2s ease-in-out infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  margin: 0;
+  height: 48px;
+  padding: 0;
+  margin-left: -12px;
+  margin-top: -8px;
+  line-height: 1;
+}
+
+@keyframes arrowStretchRight {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scaleX(1) translateX(0);
+    letter-spacing: 0px;
+  }
+  15% {
+    opacity: 0.75;
+    transform: scaleX(1.4) translateX(8px);
+    letter-spacing: 4px;
+  }
+  30% {
+    opacity: 0.9;
+    transform: scaleX(1.9) translateX(18px);
+    letter-spacing: 8px;
+  }
+  45% {
+    opacity: 1;
+    transform: scaleX(2.4) translateX(28px);
+    letter-spacing: 12px;
+  }
+  50% {
+    opacity: 1;
+    transform: scaleX(2.3) translateX(26px);
+    letter-spacing: 11px;
+  }
+  65% {
+    opacity: 0.85;
+    transform: scaleX(1.6) translateX(15px);
+    letter-spacing: 5px;
+  }
+  80% {
+    opacity: 0.7;
+    transform: scaleX(1.2) translateX(6px);
+    letter-spacing: 2px;
+  }
+  90%, 100% {
+    opacity: 0.6;
+    transform: scaleX(1) translateX(0);
+    letter-spacing: 0px;
+  }
+}
+
+/* ============ Responsive Design ============ */
+@media (max-width: 1024px) {
+  .section-content {
+    gap: clamp(30px, 5vh, 40px);
+    padding: clamp(60px, 10vh, 80px) clamp(30px, 3vw, 40px);
+  }
+}
+
+@media (max-width: 768px) {
+  .section-content {
+    flex-direction: column;
+    gap: clamp(10px, 1.5vh, 18px);
+    padding: clamp(35px, 7vh, 55px) clamp(8px, 0.8vw, 12px);
+    overflow: hidden;
+    width: 100%;
+    max-width: 100%;
+    margin-bottom: 50px;
+    height: auto;
+    max-height: calc(100vh - 110px);
+  }
+
+  .nav-arrow {
+    display: none !important;
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+  }
+
+  .nav-arrow.prev {
+    display: none !important;
+  }
+
+  .nav-arrow.next {
+    display: none !important;
+  }
+
+  .section-indicators {
+    bottom: 50px;
+    gap: 12px;
+  }
+
+  .indicator-dot {
+    width: 4px;
+    height: 4px;
+  }
+
+  .indicator-dot.active {
+    width: 13px;
+  }
+
+  .swipe-indicator {
+    bottom: 64px;
+    left: calc(50% - 84px);
+    gap: 16px;
+  }
+
+  .swipe-arrow-left,
+  .swipe-arrow-right {
+    font-size: 36px;
+  }
+
+  .swipe-track {
+    width: 100px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-container {
+    padding: 0 10px;
+    height: 120px;
+  }
+
+  .logo-brand {
+    font-size: 14px;
+  }
+
+  .btn-header {
+    padding: 4px 8px;
+    font-size: 9px;
+  }
+
+  .header-actions {
+    display: flex !important;
+    position: absolute;
+    right: -150px !important;
+  }
+
+  .header-nav {
+    display: none;
+  }
+
+  .section-content {
+    padding: 20px 10px 35px 10px;
+    gap: 10px;
+    overflow: visible;
+    margin-bottom: 45px;
+    height: auto;
+    max-height: calc(100vh - 105px);
+  }
+
+  .swipe-indicator {
+    bottom: 58px;
+    left: calc(50% - 74px);
+    gap: 12px;
+  }
+
+  .swipe-arrow-left,
+  .swipe-arrow-right {
+    font-size: 28px;
+  }
+
+  .swipe-track {
+    width: 80px;
+    height: 32px;
+    padding: 0 8px;
+    gap: 6px;
+  }
+
+  .swipe-dot {
+    width: 6px;
+    height: 6px;
+  }
+}
