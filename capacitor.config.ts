@@ -4,21 +4,17 @@ const config: CapacitorConfig = {
   appId: 'com.joblink.app',
   appName: 'Joblink',
   webDir: 'build',
-  // No server config - loads from bundled assets
+  server: {
+    url: 'http://192.168.100.5:8000',
+    cleartext: true,
+    androidScheme: 'http'
+  },
   plugins: {
     SplashScreen: {
       launchShowDuration: 800,
       launchAutoHide: true,
       backgroundColor: '#FFFFFF',
       showSpinner: false,
-    },
-    StatusBar: {
-      style: 'DARK',
-      backgroundColor: '#0b1216'
-    },
-    NavigationBar: {
-      color: '#0b1216',
-      darkButtons: false
     },
     Camera: {
       permissions: ['photos', 'camera']
