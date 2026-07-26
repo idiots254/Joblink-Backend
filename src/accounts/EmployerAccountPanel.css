@@ -2633,12 +2633,12 @@
     left: 0;
     right: 0;
     top: 0;
-    padding-top: 40px;
+    padding-top: 8px;
   }
 
   .edit-form-content,
   .edit-form-content-full {
-    padding-bottom: 80px !important;
+    padding-bottom: 64px !important;
   }
 
   .edit-form-content .form-step:last-child,
@@ -2651,9 +2651,10 @@
     flex-wrap: nowrap !important;
     justify-content: center !important;
     overflow-x: auto !important;
-    min-height: 50px !important;
+    min-height: 56px !important;
     flex-direction: row !important;
     border-top: 0.5px solid rgba(255,255,255,0.08) !important;
+    padding-bottom: calc(5px + env(safe-area-inset-bottom)) !important;
   }
 
   .form-actions-new {
@@ -2717,7 +2718,7 @@
   align-items: center !important;
   justify-content: center !important;
   gap: 12px !important;
-  padding: 8px 24px 24px 24px !important;
+  padding: 8px 24px calc(5px + env(safe-area-inset-bottom)) 24px !important;
   border-top: 0.5px solid rgba(255,255,255,0.08) !important;
   background: var(--bg-primary) !important;
   flex-wrap: nowrap !important;
@@ -3147,7 +3148,7 @@
     left: 0;
     right: 0;
     top: 0;
-    padding-top: 40px;
+    padding-top: 8px;
   }
 
   .close-panel-btn {

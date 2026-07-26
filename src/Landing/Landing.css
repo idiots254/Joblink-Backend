@@ -7,18 +7,22 @@
 }
 
 html, body {
-  overflow: hidden;
   width: 100%;
-  height: 100vh;
-  height: 100dvh;
+  min-height: 100svh;
+  min-height: 100dvh;
+  min-height: var(--app-height, 100dvh);
+  height: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .landing-page {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
   color: #a0aec0;
-  width: 100%;
-  height: 100%;
-  min-height: 100vh;
+  width: 100vw;
+  min-height: 100svh;
+  min-height: 100dvh;
+  min-height: var(--app-height, 100dvh);
   overflow: hidden;
   position: fixed;
   top: 0;
@@ -66,9 +70,9 @@ html, body {
   background: transparent;
   backdrop-filter: blur(0px);
   border-bottom: none;
-  padding: 0;
+  padding: 8px 0 8px 0;
   min-height: auto;
-  margin-bottom: -20px;
+  margin-bottom: 0;
   pointer-events: none;
   transform: none !important;
   will-change: auto;
@@ -78,21 +82,21 @@ html, body {
 .sticky-header::after {
   content: '';
   position: absolute;
-  bottom: 40px;
+  bottom: 0;
   left: 0;
   right: 0;
-  height: 0.1px;
-  background: rgba(255, 255, 255, 0.05);
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .header-container {
   max-width: 100%;
   margin: 0;
-  padding: 5px clamp(15px, 3vw, 30px) 0 clamp(15px, 3vw, 30px);
+  padding: 8px clamp(15px, 3vw, 30px);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 48px;
+  min-height: 56px;
   pointer-events: auto;
 }
 
@@ -137,8 +141,7 @@ html, body {
   gap: 12px;
   align-items: center;
   position: absolute;
-  right: -150px !important;
-  margin-left: 5px;
+  right: 16px !important;
   pointer-events: auto;
 }
 
@@ -261,7 +264,7 @@ html, body {
 /* ============ Navigation ============ */
 .section-indicators {
   position: fixed;
-  bottom: 80px;
+  bottom: calc(env(safe-area-inset-bottom) + 16px);
   left: 50%;
   transform: translateX(-50%);
   z-index: 100;
@@ -326,7 +329,7 @@ html, body {
 /* ============ Swipe Indicator ============ */
 .swipe-indicator {
   position: fixed;
-  bottom: 64px;
+  bottom: calc(env(safe-area-inset-bottom) + 14px);
   left: calc(50% - 92px);
   transform: none;
   z-index: 50;
@@ -462,7 +465,7 @@ html, body {
   }
 
   .section-indicators {
-    bottom: 50px;
+    bottom: calc(env(safe-area-inset-bottom) + 14px);
     gap: 12px;
   }
 
@@ -476,7 +479,7 @@ html, body {
   }
 
   .swipe-indicator {
-    bottom: 64px;
+    bottom: calc(env(safe-area-inset-bottom) + 14px);
     left: calc(50% - 84px);
     gap: 16px;
   }
@@ -493,8 +496,8 @@ html, body {
 
 @media (max-width: 480px) {
   .header-container {
-    padding: 0 10px;
-    height: 120px;
+    padding: 8px 10px;
+    min-height: 48px;
   }
 
   .logo-brand {
@@ -526,7 +529,7 @@ html, body {
   }
 
   .swipe-indicator {
-    bottom: 58px;
+    bottom: calc(env(safe-area-inset-bottom) + 12px);
     left: calc(50% - 74px);
     gap: 12px;
   }

@@ -79,6 +79,48 @@ const getClientUserId = (req) => {
 
 const shouldDeleteAuthUser = () => false;
 
+const shouldRetryStorageUpload = (error) => {
+  const message = error?.message || '';
+  return /row-level security policy|violates row-level security|bucket not found|not found/i.test(message);
+};
+
+const uploadToStorageWithServiceRole = async ({ bucketName, path, buffer, contentType = 'application/octet-stream' }) => {
+  const supabaseUrl = process.env.SUPABASE_URL || process.env.REACT_APP_SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE || process.env.REACT_APP_SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    return { error: new Error('Missing Supabase storage credentials') };
+  }
+
+  const encodedPath = path
+    .split('/')
+    .map((segment) => encodeURIComponent(segment))
+    .join('/');
+  const url = `${supabaseUrl.replace(/\/$/, '')}/storage/v1/object/${encodeURIComponent(bucketName)}/${encodedPath}`;
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${serviceRoleKey}`,
+        apikey: serviceRoleKey,
+        'Content-Type': contentType,
+        'x-upsert': 'true',
+      },
+      body: buffer,
+    });
+
+    if (!response.ok) {
+      const payload = await response.text().catch(() => '');
+      return { error: new Error(payload || `Storage upload failed with status ${response.status}`) };
+    }
+
+    return { error: null };
+  } catch (err) {
+    return { error: err };
+  }
+};
+
 const decodeJwtPayload = (token) => {
   try {
     const parts = token.split('.');
@@ -486,17 +528,26 @@ router.post('/avatar-upload', authenticateUser, async (req, res) => {
     const supabase = getAdminClient();
 
     const buffer = Buffer.from(base64, 'base64');
-    const uploadBucket = await resolveStorageBucket(supabase, AVATAR_BUCKET);
-    const { data, error } = await supabase.storage
-      .from(uploadBucket)
-      .upload(path, buffer, {
-        cacheControl: '3600',
-        upsert: true,
+    let uploadBucket = await resolveStorageBucket(supabase, AVATAR_BUCKET);
+    let uploadResult = await uploadToStorageWithServiceRole({
+      bucketName: uploadBucket,
+      path,
+      buffer,
+      contentType: mimeType,
+    });
+
+    if (uploadResult.error && shouldRetryStorageUpload(uploadResult.error)) {
+      uploadBucket = await resolveStorageBucket(supabase, AVATAR_BUCKET);
+      uploadResult = await uploadToStorageWithServiceRole({
+        bucketName: uploadBucket,
+        path,
+        buffer,
         contentType: mimeType,
       });
+    }
 
-    if (error) {
-      const errorMessage = error.message || 'Avatar upload failed';
+    if (uploadResult.error) {
+      const errorMessage = uploadResult.error.message || 'Avatar upload failed';
       console.error('[POST /avatar-upload] Supabase storage error:', errorMessage, {
         bucket: uploadBucket,
         path,
@@ -543,17 +594,26 @@ router.post('/media-upload', authenticateUser, async (req, res) => {
     const supabase = getAdminClient();
 
     const buffer = Buffer.from(base64, 'base64');
-    const uploadBucket = await resolveStorageBucket(supabase, MEDIA_BUCKET);
-    const { data, error } = await supabase.storage
-      .from(uploadBucket)
-      .upload(path, buffer, {
-        cacheControl: '3600',
-        upsert: true,
+    let uploadBucket = await resolveStorageBucket(supabase, MEDIA_BUCKET);
+    let uploadResult = await uploadToStorageWithServiceRole({
+      bucketName: uploadBucket,
+      path,
+      buffer,
+      contentType: mimeType,
+    });
+
+    if (uploadResult.error && shouldRetryStorageUpload(uploadResult.error)) {
+      uploadBucket = await resolveStorageBucket(supabase, MEDIA_BUCKET);
+      uploadResult = await uploadToStorageWithServiceRole({
+        bucketName: uploadBucket,
+        path,
+        buffer,
         contentType: mimeType,
       });
+    }
 
-    if (error) {
-      const errorMessage = error.message || 'Media upload failed';
+    if (uploadResult.error) {
+      const errorMessage = uploadResult.error.message || 'Media upload failed';
       console.error('[POST /media-upload] Supabase storage error:', errorMessage, {
         bucket: uploadBucket,
         path,
@@ -587,4 +647,6 @@ module.exports = {
   router,
   shouldDeleteAuthUser,
   resolveStorageBucket,
+  shouldRetryStorageUpload,
+  uploadToStorageWithServiceRole,
 };

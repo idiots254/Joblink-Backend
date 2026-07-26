@@ -3070,7 +3070,7 @@ function UserAccountPanel({ onClose, selectedAccount, selectedAccountType, onPro
 
             {/* Navigation Buttons - Steps View */}
             {viewMode === 'steps' && (
-              <div className={`form-navigation ${currentStep === 1 ? 'step-one' : ''}`}>
+              <div className={`form-navigation ${currentStep === 1 ? 'step-one' : ''}`} style={{ marginTop: '0px' }}>
                 <button 
                   className="btn-nav-prev" 
                   onClick={handlePrevStep}
@@ -3110,7 +3110,7 @@ function UserAccountPanel({ onClose, selectedAccount, selectedAccountType, onPro
 
             {/* Navigation Buttons - Full View */}
             {viewMode === 'full' && (
-              <div className="form-navigation form-navigation-full">
+              <div className="form-navigation form-navigation-full" style={{ marginTop: '0px' }}>
                 <div className="form-actions-new">
                   <button className="btn-cancel-new" onClick={handleCancel} title="Cancel">
                     <svg fill="currentColor" width="20px" height="20px" viewBox="0 0 36 36" version="1.1" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">

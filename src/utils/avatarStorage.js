@@ -21,15 +21,46 @@ const sanitizeFileName = (fileName = 'avatar') => {
   return sanitized || 'avatar';
 };
 
+export function buildAvatarStoragePath(filename = 'avatar', userId) {
+  const safeUserId = String(userId || 'anonymous').trim() || 'anonymous';
+  const safeFilename = String(filename || 'avatar')
+    .replace(/\\/g, '/')
+    .split('/')
+    .pop() || 'avatar';
+  const sanitizedBaseName = safeFilename
+    .normalize('NFKD')
+    .replace(/[^a-zA-Z0-9._-]/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^_+|_+$/g, '');
+
+  const cleanFileName = sanitizedBaseName || 'avatar';
+  const timestamp = Date.now();
+  return `${safeUserId}/${timestamp}-${cleanFileName}`;
+}
+
 export async function uploadAvatarToSupabase(file, userId) {
   if (!file) throw new Error('No image file was selected.');
   if (!ALLOWED_IMAGE_TYPES.has(file.type)) throw new Error('Only JPG, PNG, WEBP, or GIF images are supported.');
   if (file.size > MAX_AVATAR_SIZE_BYTES) throw new Error('Avatar image must be 2MB or smaller.');
 
-  const safeUserId = String(userId || 'anonymous').trim();
-  const timestamp = Date.now();
-  const safeName = sanitizeFileName(file.name || `avatar-${timestamp}`);
-  const path = `${safeUserId}/${timestamp}-${safeName}`;
+  const path = buildAvatarStoragePath(file.name, userId);
+
+  try {
+    const { error } = await supabase.storage.from(AVATAR_BUCKET).upload(path, file, {
+      cacheControl: '3600',
+      upsert: true,
+      contentType: file.type || 'image/jpeg',
+    });
+
+    if (!error) {
+      const { data: publicUrlData } = supabase.storage.from(AVATAR_BUCKET).getPublicUrl(path);
+      return { path, publicUrl: publicUrlData?.publicUrl || null };
+    }
+
+    console.warn('Direct avatar upload to Supabase failed, falling back to server route:', error?.message || error);
+  } catch (directErr) {
+    console.warn('Direct avatar upload threw, falling back to server route:', directErr?.message || directErr);
+  }
 
   try {
     const toBase64 = (fileBlob) => new Promise((resolve, reject) => {

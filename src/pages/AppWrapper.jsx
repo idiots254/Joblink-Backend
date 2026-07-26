@@ -18,6 +18,7 @@ import FollowLikeListPage from '../components/FollowLikeListPage';
 import MediaDebugPanel from './MediaDebugPanel';
 import { getFallbackRoute, getLandingEntryRoute, shouldClearStaleAuthFlags, shouldHandleAuthCallback, shouldDeferAuthRedirect } from '../utils/authRouting';
 import { getPublicAssetUrl } from '../utils/publicAssetUrl';
+import { initViewportHeight } from '../utils/viewport';
 
 const normalizePendingRoute = (route) => {
   if (typeof route !== 'string') return '';
@@ -673,6 +674,10 @@ export default function AppWrapper() {
     return localStorage.getItem('_authCached') === 'true';
   });
   const nativeOauthPickerActiveRef = React.useRef(false);
+
+  React.useEffect(() => {
+    return initViewportHeight();
+  }, []);
 
   // On app startup, clear stale oauth/auth flags if there's no active session
   React.useEffect(() => {

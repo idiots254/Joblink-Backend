@@ -55,9 +55,11 @@ button:focus-within {
 
 html {
   width: 100%;
-  height: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  height: auto;
   overflow-x: hidden;
-  overflow-y: hidden;
+  overflow-y: auto;
   background: var(--bg-primary) !important;
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -71,9 +73,11 @@ html::-webkit-scrollbar {
 
 body {
   width: 100%;
-  height: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  height: auto;
   overflow-x: hidden;
-  overflow-y: hidden;
+  overflow-y: auto;
   background: var(--bg-primary) !important;
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -92,8 +96,11 @@ body {
 }
 
 #root {
-  height: 100%;
-  overflow: hidden;
+  min-height: 100vh;
+  min-height: 100dvh;
+  height: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
@@ -107,7 +114,7 @@ body {
 .Joblink {
   width: 100%;
   min-height: 100vh;
-  height: 100vh;
+  min-height: 100dvh;
   background: var(--bg-primary);
   background-image: none !important;
   display: flex;
@@ -115,8 +122,8 @@ body {
   align-items: flex-start;
   padding: 0;
   overflow-x: hidden;
-  overflow-y: hidden;
-  padding-bottom: 50px;
+  overflow-y: visible;
+  padding-bottom: 20px;
   padding-top: max(0px, env(safe-area-inset-top));
   position: relative;
   touch-action: pan-y;
@@ -139,8 +146,8 @@ body {
 }
 
 .Joblink-header-top {
-  margin-top: 26px;
-  padding: clamp(24px, 4vw, 32px) clamp(12px, 4vw, 28px);
+  margin-top: 0;
+  padding: clamp(18px, 3.2vw, 26px) clamp(12px, 4vw, 28px);
   padding-left: max(clamp(12px, 4vw, 28px), env(safe-area-inset-left));
   padding-right: max(clamp(12px, 4vw, 28px), env(safe-area-inset-right));
   display: flex;
@@ -187,7 +194,7 @@ body.notifications-open .bottom-profile-wrapper {
   gap: clamp(40px, 12vw, 80px);
   width: 100%;
   padding: 0px clamp(12px, 2.5vw, 20px) !important;
-  padding-bottom: max(0px, calc(0px + env(safe-area-inset-bottom))) !important;
+  padding-bottom: calc(5px + env(safe-area-inset-bottom)) !important;
   background: var(--bg-primary) !important;
   overflow-x: auto;
   overflow-y: visible;
@@ -197,7 +204,7 @@ body.notifications-open .bottom-profile-wrapper {
   -ms-overflow-style: none;
   border-top: 0.35px solid rgba(127, 141, 156, 0.04);
   position: fixed;
-  bottom: 40px !important;
+  bottom: calc(0px + env(safe-area-inset-bottom)) !important;
   left: 0;
   right: 0;
   z-index: 999;
@@ -224,7 +231,7 @@ body.notifications-open .bottom-profile-wrapper {
   left: 0;
   right: 0;
   bottom: 0;
-  height: calc(40px + env(safe-area-inset-bottom));
+  height: calc(48px + env(safe-area-inset-bottom));
   background: var(--bg-primary);
   z-index: 998;
   pointer-events: none;
@@ -251,7 +258,7 @@ body.notifications-open .bottom-profile-wrapper {
   justify-content: center;
   gap: 4px;
   white-space: nowrap;
-  margin-bottom: 4px !important;
+  margin-bottom: 10px !important;
   scroll-snap-align: center;
   scroll-snap-stop: auto;
   transform: scale(1);
@@ -359,7 +366,7 @@ body.notifications-open .bottom-profile-wrapper {
 
 .Joblink-content {
   position: absolute;
-  top: 38px;
+  top: calc(64px + env(safe-area-inset-top));
   left: 0;
   right: 0;
   bottom: 0;
@@ -371,8 +378,8 @@ body.notifications-open .bottom-profile-wrapper {
   align-items: flex-start;
   justify-content: flex-start;
   padding: 0px;
-  padding-top: 16px;
-  padding-bottom: calc(80px + env(safe-area-inset-bottom));
+  padding-top: 8px;
+  padding-bottom: calc(48px + env(safe-area-inset-bottom));
   overflow-y: auto;
   overflow-x: hidden;
   overscroll-behavior: contain;
@@ -453,8 +460,9 @@ body.notifications-open .bottom-profile-wrapper {
   }
 
   .Joblink-content {
+    top: calc(100px + env(safe-area-inset-top));
     padding: 0px;
-    padding-top: 60px;
+    padding-top: 8px;
     padding-bottom: 30px !important;
   }
 
@@ -532,8 +540,9 @@ body.notifications-open .bottom-profile-wrapper {
   }
 
   .Joblink-content {
+    top: calc(64px + env(safe-area-inset-top));
     padding: 0px;
-    padding-top: 50px;
+    padding-top: 8px;
     padding-bottom: 15px !important;
   }
 }
@@ -588,7 +597,7 @@ body.notifications-open .bottom-profile-wrapper {
 
   .Joblink-content {
     padding: 0px;
-    padding-top: 40px;
+    padding-top: 6px;
     padding-bottom: 15px !important;
   }
   .Trending h2,

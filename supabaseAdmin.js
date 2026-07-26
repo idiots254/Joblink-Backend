@@ -5,7 +5,7 @@ let _adminClient = null;
 function getAdminClient() {
   if (_adminClient) return _adminClient;
   const supabaseUrl = process.env.SUPABASE_URL || process.env.REACT_APP_SUPABASE_URL;
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE || process.env.REACT_APP_SUPABASE_SERVICE_ROLE_KEY;
 
   const missingKeys = [];
   if (!supabaseUrl) missingKeys.push('SUPABASE_URL or REACT_APP_SUPABASE_URL');

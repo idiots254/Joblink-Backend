@@ -1249,14 +1249,18 @@ function Joblink({ initialView = null }) {
       }
     };
 
-    loadInitialHomeProfiles();
+    // Skip profile loading during account creation - only load when showing main app
+    if (!showAccountPanel && !showAccountTypeSelector) {
+      loadInitialHomeProfiles();
+    }
+    
     return () => {
       canceled = true;
       if (idleCallbackId && window.cancelIdleCallback) {
         window.cancelIdleCallback(idleCallbackId);
       }
     };
-  }, [fetchLikeViewCounts]);
+  }, [fetchLikeViewCounts, showAccountPanel, showAccountTypeSelector]);
 
   useEffect(() => {
     if (!user?.id) {

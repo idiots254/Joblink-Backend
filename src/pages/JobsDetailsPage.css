@@ -30,7 +30,7 @@
   position: fixed;
   inset: 0;
   width: 100vw;
-  height: 100vh;
+  height: 100dvh;
   min-height: 100dvh;
   background: var(--bg-primary-JOBS);
   z-index: 2000;
@@ -44,10 +44,11 @@
 
 .details-panel-dt-JOBS {
   position: absolute;
+  inset: 0;
   width: 100%;
   max-width: none;
   height: 100%;
-  max-height: 100vh;
+  max-height: 100dvh;
   background: var(--bg-primary-JOBS);
   color: var(--text-primary-JOBS);
   border: 1px solid var(--border-JOBS);
@@ -56,9 +57,7 @@
   flex-direction: column;
   overflow: hidden;
   box-shadow: none;
-  top: 0;
-  left: 0;
-  padding: 0 12px 0 12px;
+  padding: max(4px, env(safe-area-inset-top)) 12px calc(10px + env(safe-area-inset-bottom)) 12px;
   box-sizing: border-box;
   touch-action: manipulation;
   user-select: none;
@@ -110,7 +109,7 @@
 .back-arrow-btn-dt-JOBS,
 .close-panel-btn-dt-JOBS {
   position: absolute;
-  top: 20px;
+  top: calc(12px + env(safe-area-inset-top));
   border: none;
   background: transparent;
  
@@ -141,8 +140,8 @@
 
 .back-arrow-btn-dt-JOBS {
   left: 30px !important;
-  top: 56px !important;
-  inset: 56px auto auto 30px !important;
+  top: calc(24px + env(safe-area-inset-top)) !important;
+  inset: calc(24px + env(safe-area-inset-top)) auto auto 30px !important;
   color: var(--text-secondary-JOBS) !important;
 }
 
@@ -163,9 +162,9 @@
   box-shadow: 0 0 20px rgba(0, 168, 68, 0.5);
 }
 
-..details-header-premium-dt-JOBS {
-  margin-top: 12px;
-  padding: 30px 24px 18px 24px;
+.details-header-premium-dt-JOBS {
+  margin-top: 0;
+  padding: calc(14px + env(safe-area-inset-top)) 24px 10px 24px;
   background: var(--bg-primary-JOBS);
 }
 
@@ -173,9 +172,10 @@
   display: flex;
   gap: 14px;
   align-items: flex-start;
-  margin-bottom: 2px !important;
+  margin-bottom: 0 !important;
   width: 100%;
   position: relative;
+  min-height: 72px;
 }
 
 .avatar-section-dt-JOBS {
@@ -729,7 +729,7 @@
   }
 
   .media-lightbox-footer-dt-JOBS {
-    bottom: 50px !important;
+    bottom: calc(5px + env(safe-area-inset-bottom)) !important;
     left: 8px !important;
     right: 8px !important;
     width: calc(100% - 16px) !important;
@@ -833,7 +833,7 @@
 
 .media-lightbox-footer-dt-JOBS {
   position: fixed;
-  bottom: 16px;
+  bottom: calc(5px + env(safe-area-inset-bottom));
   left: 16px;
   right: 16px;
   width: calc(100% - 32px);
@@ -916,40 +916,22 @@
 }
 
 .cta-footer-dt-JOBS {
-  padding: 30px 40px 60px 40px;
+  padding: 8px 16px calc(14px + env(safe-area-inset-bottom)) 16px;
   display: flex;
-  gap: 20px;
+  gap: 8px;
   border-top: none;
   background: var(--bg-primary-JOBS);
   flex-wrap: nowrap;
   justify-content: center;
   align-items: center;
   position: fixed;
-  bottom: 0;
-  z-index: 50;
-  overflow-x: hidden;
-  width: 100%;
   left: 0;
   right: 0;
-}
-
-.cta-footer-dt-JOBS {
-  padding: 16px 40px 120px 40px;
-  display: flex;
-  gap: 6px;
-  border-top: none;
-  background: var(--bg-primary-JOBS);
-  flex-wrap: nowrap;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-  bottom: auto;
-  z-index: 50;
+  bottom: calc(5px + env(safe-area-inset-bottom));
+  z-index: 100;
   overflow-x: hidden;
   width: 100%;
-  left: auto;
-  right: auto;
-  margin-top: auto;
+  box-sizing: border-box;
 }
 
 .apply-btn-dt-JOBS,
@@ -1003,7 +985,10 @@
   }
 
   .details-header-premium-dt-JOBS {
-    padding-top: 56px;
+    padding-top: calc(8px + env(safe-area-inset-top));
+    padding-left: 18px;
+    padding-right: 18px;
+    padding-bottom: 8px;
   }
 
   .header-inner-dt-JOBS {
@@ -1012,10 +997,10 @@
     justify-content: center;
     text-align: left;
     gap: 6px;
-    min-height: 88px;
+    min-height: 64px;
     margin: 0 auto;
     max-width: 280px;
-    transform: translateX(40px);
+    transform: translateX(20px);
   }
 
   .avatar-section-dt-JOBS {
@@ -1109,21 +1094,27 @@
   }
 
   .cta-footer-dt-JOBS {
-    padding: 12px 16px 70px 16px;
+    padding: 8px 14px calc(18px + env(safe-area-inset-bottom)) 14px;
     gap: 8px;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: calc(5px + env(safe-area-inset-bottom));
+    z-index: 100;
+    box-sizing: border-box;
   }
 }
 
 @media (max-width: 480px) {
   .details-header-premium-dt-JOBS {
-    padding: 36px 14px 14px;
-    margin-top: 8px;
+    padding: calc(10px + env(safe-area-inset-top)) 14px 10px 14px;
+    margin-top: 0;
   }
 
   .back-arrow-btn-dt-JOBS {
     width: 14px !important;
     height: 14px !important;
-    top:47px !important;
+    top: calc(8px + env(safe-area-inset-top)) !important;
     left: 27px !important;
   }
 
@@ -1180,7 +1171,7 @@
   }
 
   .cta-footer-dt-JOBS {
-    padding: 10px 14px 62px 14px;
+    padding: 8px 14px calc(18px + env(safe-area-inset-bottom)) 14px;
     gap: 8px;
   }
 
