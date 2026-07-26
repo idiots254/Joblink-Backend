@@ -1,76 +1,36 @@
 {
-  "name": "joblink",
-  "version": "0.1.0",
-  "private": true,
-  "homepage": "./",
+  "name": "joblink-backend",
+  "version": "1.0.0",
+  "description": "Backend API for Joblink application",
+  "main": "server.js",
+  "keywords": [
+    "api",
+    "joblink"
+  ],
+  "author": "",
+  "license": "ISC",
   "dependencies": {
-    "@capacitor/android": "^8.3.4",
-    "@capacitor/app": "^8.1.0",
-    "@capacitor/browser": "^5.0.0",
-    "@capacitor/cli": "^8.3.4",
-    "@capacitor/clipboard": "^8.0.1",
-    "@capacitor/core": "^8.3.4",
-    "@capacitor/geolocation": "^8.2.0",
-    "@capacitor/local-notifications": "^1.0.0",
-    "@capacitor/push-notifications": "^8.1.1",
-    "@capacitor/status-bar": "^8.0.2",
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.1",
-    "@mui/material": "^7.3.9",
-    "@supabase/supabase-js": "^2.99.2",
-    "ajv": "^8.20.0",
-    "axios": "^1.13.6",
-    "code-push": "^4.2.3",
-    "cordova-plugin-googleplus": "^8.5.2",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "react-icons": "^5.6.0",
-    "react-router-dom": "^7.13.1",
-    "react-scripts": "5.0.1",
-    "recharts": "^3.8.0"
+    "@sendgrid/mail": "^7.7.0",
+    "@supabase/supabase-js": "^2.38.0",
+    "axios": "^1.4.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "express-rate-limit": "^6.8.0",
+    "express-validator": "^6.15.0",
+    "ioredis": "^5.3.2",
+    "prom-client": "^14.0.0",
+    "pg": "^8.10.0",
+    "google-auth-library": "^9.4.0",
+    "googleapis": "^118.0.0",
+    "nodemailer": "^6.9.3"
   },
   "scripts": {
-    "start": "set PORT=8000 && react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "android:dev": "node live-reload.js dev",
-    "android:prod": "node live-reload.js prod",
-    "android:setup": "pwsh live-reload.ps1 setup",
-    "android:install": "pwsh live-reload.ps1 install",
-    "android:start": "pwsh live-reload.ps1 start",
-    "cap:sync": "npx cap sync android",
-    "cap:build": "cd android && .\\gradlew.bat assembleDebug",
-    "cap:install": "npm run cap:sync && npm run cap:build && $ADB_PATH = 'C:\\Users\\Somalux\\AppData\\Local\\Android\\Sdk\\platform-tools'; $env:PATH += \";$ADB_PATH\"; adb install -r android/app/build/outputs/apk/debug/app-debug.apk; adb shell am start -n 'com.joblink.app/.MainActivity'",
-    "mobile:dev": "concurrently \"npm start\" \"npm run cap:install\"",
-    "mobile:debug": "npm run cap:sync && npm run cap:build && npx cap open android",
-    "create:avatar-bucket": "node tools/create_avatar_bucket.js",
-    "check:google-config": "node tools/check-google-config.js",
-    "mobile:release": "powershell -ExecutionPolicy Bypass -File build-release-apk.ps1",
-    "deploy:netlify": "npm run build && netlify deploy --prod --dir=build"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "migrate": "node migrations/apply.js"
   },
   "devDependencies": {
-    "concurrently": "^9.2.1",
-    "netlify-cli": "^26.1.0",
-    "sharp": "^0.34.5",
-    "typescript": "^6.0.3"
+    "nodemon": "^3.0.1"
   }
 }

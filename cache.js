@@ -31,12 +31,7 @@ const cacheHits = getOrCreateCounter('cache_hits_total', 'Cache hits');
 const cacheMisses = getOrCreateCounter('cache_misses_total', 'Cache misses');
 
 function isRedisEnabled() {
-  const explicitSetting = process.env.REDIS_ENABLED;
-  if (explicitSetting !== undefined) {
-    return ['1', 'true', 'yes', 'on'].includes(String(explicitSetting).toLowerCase());
-  }
-
-  return process.env.CACHE_BACKEND === 'redis';
+  return false;
 }
 
 function resolveRedisUrl() {
@@ -59,6 +54,33 @@ function warnRedisUnavailable(error) {
     if (process.env.NODE_ENV !== 'test' && process.env.REDIS_VERBOSE !== 'false') {
       console.warn('[cache] Redis unavailable, falling back to in-memory cache:', error?.message || error);
     }
+  }
+}
+
+async function ensureRedisClientWithRetry(redisUrl, attemptCount = 0) {
+  try {
+    await redisClient.connect();
+    redisReady = true;
+    return redisClient;
+  } catch (error) {
+    if (attemptCount >= 1) {
+      redisReady = false;
+      redisConnectPromise = null;
+      warnRedisUnavailable(error);
+      return null;
+    }
+
+    try {
+      const started = await startLocalRedisIfNeeded(redisUrl);
+      if (started) {
+        return ensureRedisClientWithRetry(redisUrl, attemptCount + 1);
+      }
+    } catch (retryError) {
+      // fall through to the warning below
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 750));
+    return ensureRedisClientWithRetry(redisUrl, attemptCount + 1);
   }
 }
 
@@ -159,21 +181,8 @@ async function ensureRedisClient() {
           return redisClient;
         }
 
-        await redisClient.connect();
-        redisReady = true;
-        return redisClient;
+        return ensureRedisClientWithRetry(redisUrl);
       } catch (error) {
-        try {
-          const started = await startLocalRedisIfNeeded(redisUrl);
-          if (started) {
-            await redisClient.connect();
-            redisReady = true;
-            return redisClient;
-          }
-        } catch (retryError) {
-          // fall through to the warning below
-        }
-
         redisReady = false;
         redisConnectPromise = null;
         warnRedisUnavailable(error);

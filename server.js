@@ -13,7 +13,7 @@ console.log(`✅ Loaded env files: ${backendEnvPath}${process.env.PORT ? '' : ` 
 // Import routes
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
-const accountRoutes = require('./routes/account');
+const { router: accountRoutes } = require('./routes/account');
 const feedbackRoutes = require('./routes/feedback');
 const utilsRoutes = require('./routes/utils');
 // Debug routes for auth inspection (only enabled on server side)
@@ -26,11 +26,14 @@ try {
 const { authLimiter } = require('./middleware/rateLimiter');
 const { metricsMiddleware, register } = require('./metrics');
 const { getAdminClient } = require('./supabaseAdmin');
-const cache = require('./cache');
+
+const supabaseEnvStatus = {
+  SUPABASE_URL: Boolean(process.env.SUPABASE_URL || process.env.REACT_APP_SUPABASE_URL),
+  SUPABASE_SERVICE_ROLE_KEY: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE),
+};
+console.log('ℹ️ Supabase environment variables loaded:', supabaseEnvStatus);
 
 const app = express();
-
-cache.initializeRedis().catch(() => {});
 
 // Middleware
 app.set('trust proxy', 1);
@@ -51,30 +54,36 @@ app.use('/api/utils', utilsRoutes);
 if (debugAuthRoutes) app.use('/api/debug-auth', debugAuthRoutes);
 
 // Server-side realtime listener: invalidate cache when follows change
-try {
-  const supabase = getAdminClient();
-  if (supabase && typeof supabase.channel === 'function') {
-    const channel = supabase.channel('server-follows-listener');
-    channel.on('postgres_changes', { event: '*', schema: 'public', table: 'follows' }, (payload) => {
-      try {
-        const followedId = payload?.new?.followed_id || payload?.old?.followed_id;
-        if (followedId) {
-          cache.del(`followers_count:${followedId}`).catch(() => {});
-          cache.del(`profile:id:${followedId}`).catch(() => {});
+const hasSupabaseAdmin = Boolean(process.env.SUPABASE_URL || process.env.REACT_APP_SUPABASE_URL) &&
+  Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE);
+
+if (!hasSupabaseAdmin) {
+  console.warn('⚠️ Realtime listener disabled: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required');
+} else {
+  try {
+    const supabase = getAdminClient();
+    if (supabase && typeof supabase.channel === 'function') {
+      const channel = supabase.channel('server-follows-listener');
+      channel.on('postgres_changes', { event: '*', schema: 'public', table: 'follows' }, (payload) => {
+        try {
+          const followedId = payload?.new?.followed_id || payload?.old?.followed_id;
+          if (followedId) {
+            // Cache invalidation is disabled because Redis has been removed.
+          }
+        } catch (e) {
+          console.warn('[realtime] follow event handling error', e?.message || e);
         }
+      });
+      try {
+        channel.subscribe();
+        console.log('✅ Subscribed to follows realtime events');
       } catch (e) {
-        console.warn('[realtime] follow event handling error', e?.message || e);
+        console.warn('⚠️ Realtime subscribe failed', e?.message || e);
       }
-    });
-    try {
-      channel.subscribe();
-      console.log('✅ Subscribed to follows realtime events');
-    } catch (e) {
-      console.warn('⚠️ Realtime subscribe failed', e?.message || e);
     }
+  } catch (e) {
+    console.warn('⚠️ Failed to initialize realtime follow listener', e?.message || e);
   }
-} catch (e) {
-  console.warn('⚠️ Failed to initialize realtime follow listener', e?.message || e);
 }
 
 app.get('/metrics', async (req, res) => {

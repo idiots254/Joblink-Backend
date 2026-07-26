@@ -6,21 +6,54 @@ const AVATAR_BUCKET = 'user-avatars';
 const MEDIA_BUCKET = 'media_files';
 
 const BUCKET_ALIASES = {
-  'user-avatars': ['user_avatars'],
-  media_files: ['media-files'],
+  'user-avatars': ['user_avatars', 'avatars', 'user-avatars', 'user_avatars_bucket'],
+  'media_files': ['media-files', 'media', 'uploads', 'media_files_bucket'],
+  'media-files': ['media_files', 'media', 'uploads', 'media_files_bucket'],
+  user_avatars: ['user-avatars', 'avatars', 'user_avatars_bucket'],
+  'media': ['media_files', 'media-files', 'uploads'],
 };
 
 const resolveStorageBucket = async (supabase, bucketName) => {
-  const aliases = BUCKET_ALIASES[bucketName] || [];
-  const candidates = [bucketName, ...aliases];
+  const aliases = BUCKET_ALIASES[bucketName] || BUCKET_ALIASES[String(bucketName)] || [];
+  const candidates = Array.from(new Set([bucketName, ...aliases].filter(Boolean)));
   let lastError = null;
 
   for (const candidate of candidates) {
-    const { data, error } = await supabase.storage.getBucket(candidate);
-    if (!error && data) {
-      return candidate;
+    try {
+      const { data, error } = await supabase.storage.getBucket(candidate);
+      if (!error && data) {
+        return candidate;
+      }
+      lastError = error || lastError;
+    } catch (err) {
+      lastError = err;
     }
-    lastError = error;
+  }
+
+  try {
+    const { data: bucketsData, error: listError } = await supabase.storage.listBuckets?.();
+    if (!listError && Array.isArray(bucketsData)) {
+      for (const candidate of candidates) {
+        const matchingBucket = bucketsData.find((bucket) => bucket?.name === candidate);
+        if (matchingBucket) {
+          return candidate;
+        }
+      }
+    }
+  } catch (listErr) {
+    lastError = listErr;
+  }
+
+  for (const candidate of candidates) {
+    try {
+      const createResult = await supabase.storage.createBucket?.(candidate, { public: true });
+      if (!createResult?.error && createResult?.data) {
+        return candidate;
+      }
+      lastError = createResult?.error || lastError;
+    } catch (createErr) {
+      lastError = createErr;
+    }
   }
 
   throw lastError || new Error(`Storage bucket not found: ${bucketName}`);
@@ -43,6 +76,8 @@ const getClientUserId = (req) => {
   const headerValue = req.headers['x-user-id'] || req.headers['X-User-Id'];
   return typeof headerValue === 'string' && headerValue.trim() ? headerValue.trim() : null;
 };
+
+const shouldDeleteAuthUser = () => false;
 
 const decodeJwtPayload = (token) => {
   try {
@@ -393,17 +428,14 @@ router.post('/delete', authenticateUser, async (req, res) => {
       return res.status(500).json({ error: 'Failed to delete profile' });
     }
 
-    // Step 5: Delete from auth. If the auth user is already gone, we still continue and remove any leftover profile row.
-    const { error: authDeleteError } = await supabase.auth.admin.deleteUser(req.userId);
-
-    if (authDeleteError) {
-      const message = authDeleteError.message || '';
-      const alreadyMissing = /not found|does not exist|user not found/i.test(message);
-      if (!alreadyMissing) {
-        console.error('[DELETE account] Auth deletion error:', authDeleteError);
-        return res.status(500).json({ error: 'Failed to delete auth user' });
+    // Step 5: Preserve the Supabase auth identity and only remove the app profile/data.
+    if (shouldDeleteAuthUser()) {
+      const { error: authDeleteError } = await supabase.auth.admin.deleteUser(req.userId);
+      if (authDeleteError) {
+        console.warn('[DELETE account] Auth deletion warning:', authDeleteError.message || authDeleteError);
       }
-      console.warn('[DELETE account] Auth user already missing, continuing profile cleanup');
+    } else {
+      console.log(`[DELETE account] Preserving auth identity ${req.userId}; removing only profile data`);
     }
 
     // Step 6: Make sure no profile row remains in the database after auth deletion.
@@ -429,7 +461,7 @@ router.post('/delete', authenticateUser, async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Account deleted successfully'
+      message: 'Profile and related data removed successfully. Your authentication account was preserved.'
     });
   } catch (err) {
     console.error('[POST /account/delete] Unexpected error:', err.message);
@@ -464,8 +496,13 @@ router.post('/avatar-upload', authenticateUser, async (req, res) => {
       });
 
     if (error) {
-      console.error('[POST /avatar-upload] Supabase storage error:', error);
-      return res.status(500).json({ error: error.message || 'Avatar upload failed' });
+      const errorMessage = error.message || 'Avatar upload failed';
+      console.error('[POST /avatar-upload] Supabase storage error:', errorMessage, {
+        bucket: uploadBucket,
+        path,
+        filename: safeFilename,
+      });
+      return res.status(500).json({ error: errorMessage });
     }
 
     const { data: publicUrlData, error: urlError } = supabase.storage
@@ -481,7 +518,10 @@ router.post('/avatar-upload', authenticateUser, async (req, res) => {
       publicUrl: publicUrlData?.publicUrl || null,
     });
   } catch (err) {
-    console.error('[POST /avatar-upload] Unexpected error:', err.message);
+    console.error('[POST /avatar-upload] Unexpected error:', err.message, {
+      bucket: AVATAR_BUCKET,
+      userId: req.userId,
+    });
     return res.status(500).json({ error: 'Avatar upload failed' });
   }
 });
@@ -513,8 +553,13 @@ router.post('/media-upload', authenticateUser, async (req, res) => {
       });
 
     if (error) {
-      console.error('[POST /media-upload] Supabase storage error:', error);
-      return res.status(500).json({ error: error.message || 'Media upload failed' });
+      const errorMessage = error.message || 'Media upload failed';
+      console.error('[POST /media-upload] Supabase storage error:', errorMessage, {
+        bucket: uploadBucket,
+        path,
+        filename: safeFilename,
+      });
+      return res.status(500).json({ error: errorMessage });
     }
 
     const { data: publicUrlData, error: urlError } = supabase.storage
@@ -530,9 +575,16 @@ router.post('/media-upload', authenticateUser, async (req, res) => {
       publicUrl: publicUrlData?.publicUrl || null,
     });
   } catch (err) {
-    console.error('[POST /media-upload] Unexpected error:', err.message);
+    console.error('[POST /media-upload] Unexpected error:', err.message, {
+      bucket: MEDIA_BUCKET,
+      userId: req.userId,
+    });
     return res.status(500).json({ error: 'Media upload failed' });
   }
 });
 
-module.exports = router;
+module.exports = {
+  router,
+  shouldDeleteAuthUser,
+  resolveStorageBucket,
+};
