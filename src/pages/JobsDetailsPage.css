@@ -1,7 +1,7 @@
 :root {
-  --bg-primary-JOBS: #f8f8f7;
-  --bg-secondary-JOBS: #f0f0ef;
-  --bg-card-JOBS: #fcfcfb;
+  --bg-primary-JOBS: #ffffff;
+  --bg-secondary-JOBS: #ffffff;
+  --bg-card-JOBS: #ffffff;
   --text-primary-JOBS: #0b1216;
   --text-secondary-JOBS: #4b5563;
   --border-JOBS: rgba(11, 18, 22, 0.12);
@@ -67,6 +67,11 @@
 [data-theme="dark"] .details-panel-dt-JOBS {
   border: none;
   box-shadow: none;
+}
+
+[data-theme="light"] .details-panel-dt-JOBS {
+  border-top: none;
+  border-bottom: none;
 }
 
 /* ========== FLOATING HEARTS ========== */

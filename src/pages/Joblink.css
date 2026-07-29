@@ -33,9 +33,9 @@ button:focus-within {
 
 /* Light Mode Styles */
 [data-theme="light"] {
-  --bg-primary: #f8f8f7;
-  --bg-secondary: #f0f0ef;
-  --bg-card: #fcfcfb;
+  --bg-primary: #ffffff;
+  --bg-secondary: #ffffff;
+  --bg-card: #ffffff;
   --text-primary: #0b1216;
   --text-secondary: #0b1216;
   --border-color: #d0d0d0;
@@ -146,7 +146,7 @@ body {
 }
 
 .Joblink-header-top {
-  margin-top: 0;
+  margin-top: 20px;
   padding: clamp(18px, 3.2vw, 26px) clamp(12px, 4vw, 28px);
   padding-left: max(clamp(12px, 4vw, 28px), env(safe-area-inset-left));
   padding-right: max(clamp(12px, 4vw, 28px), env(safe-area-inset-right));
@@ -174,7 +174,7 @@ body.notifications-open .bottom-profile-wrapper {
   letter-spacing: 0.5px;
   margin-left: 0 !important;
   margin-right: auto !important;
-  margin-top: -4px !important;
+  margin-top: 0 !important;
 }
 
 .tab-icon {
@@ -504,7 +504,7 @@ body.notifications-open .bottom-profile-wrapper {
     font-size: clamp(1.3rem, 4vw, 1.5rem);
     flex-shrink: 0;
     font-weight: 600;
-    margin-top: -4px !important;
+    margin-top: 0 !important;
   }
 
   .tabs-container {
@@ -572,7 +572,7 @@ body.notifications-open .bottom-profile-wrapper {
     font-size: clamp(1.2rem, 3.5vw, 1.4rem);
     flex-shrink: 0;
     font-weight: 600;
-    margin-top: -4px !important;
+    margin-top: 0 !important;
   }
 
   .tabs-container {

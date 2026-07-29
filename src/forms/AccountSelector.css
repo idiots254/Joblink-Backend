@@ -90,19 +90,20 @@
   gap: 12px;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
-  border: none;
+  background: linear-gradient(135deg, var(--bg-card), color-mix(in srgb, var(--bg-card) 92%, var(--text-primary) 8%));
+  border: 1px solid var(--border-color);
   padding: 24px 18px;
   border-radius: 18px;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   text-align: center;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 24px rgba(2, 8, 23, 0.08);
   width: 100%;
   min-height: 180px;
   box-sizing: border-box;
   position: relative;
   overflow: hidden;
+  color: var(--text-primary);
 }
 
 .role-card::before {
@@ -115,7 +116,8 @@
 
 .role-card:hover {
   transform: translateY(-8px);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 16px 40px rgba(2, 8, 23, 0.14);
+  border-color: var(--accent-color);
 }
 
 .role-card:active {
@@ -124,8 +126,43 @@
 
 
 .role-card--selected {
-  background: rgba(34, 197, 94, 0.12);
-  box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.25);
+  background: linear-gradient(135deg, rgba(0, 168, 68, 0.16), rgba(0, 168, 68, 0.08));
+  border-color: rgba(0, 168, 68, 0.35);
+  box-shadow: 0 0 0 1px rgba(0, 168, 68, 0.2), 0 10px 24px rgba(0, 168, 68, 0.12);
+}
+
+.light-bg .role-card,
+.light-bg .role-card--selected,
+[data-theme="light"] .role-card,
+[data-theme="light"] .role-card--selected,
+html[data-theme="light"] .role-card,
+html[data-theme="light"] .role-card--selected,
+body[data-theme="light"] .role-card,
+body[data-theme="light"] .role-card--selected {
+  background: #ffffff !important;
+  border: 1px solid rgba(15, 23, 42, 0.08) !important;
+  box-shadow: 0 18px 54px rgba(15, 23, 42, 0.12) !important;
+}
+
+.light-bg .role-card:hover,
+[data-theme="light"] .role-card:hover,
+html[data-theme="light"] .role-card:hover,
+body[data-theme="light"] .role-card:hover {
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.16) !important;
+}
+
+.light-bg .role-card-title,
+[data-theme="light"] .role-card-title,
+html[data-theme="light"] .role-card-title,
+body[data-theme="light"] .role-card-title {
+  color: #111827 !important;
+}
+
+.light-bg .role-card-description,
+[data-theme="light"] .role-card-description,
+html[data-theme="light"] .role-card-description,
+body[data-theme="light"] .role-card-description {
+  color: #475569 !important;
 }
 
 .role-card--selected .role-icon {
